@@ -1392,6 +1392,10 @@ http://www.cisco.com/c/en/us/support/docs/security-vpn/secure-socket-layer-ssl/1
         if (transport_type != 2 || rx_len != min_size_hdr)              // If NOT wifi...
           logd ("have_len: %d < enc_len: %d  need_len: %d", have_len, enc_len, need_len);
 
+        // Move the buffer back to the start
+        memmove(rx_buf, buf, have_len);
+        buf = rx_buf;
+
         int need_ret = hu_aap_tra_recv (& buf [have_len], need_len, -1);// Get Rx packet from Transport. Use -1 instead of iaap_tra_recv_tmo to indicate need to get need_len bytes
                                                                         // Length remaining for all sub-packets plus 4/8 byte headers
         if (need_ret != need_len) {                                     // If we didn't get precisely the number of bytes we need...
