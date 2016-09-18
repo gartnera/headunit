@@ -1,9 +1,9 @@
 #CC=gcc
 #LD=ld
-INCLUDES=`pkg-config --cflags gstreamer-0.10 gstreamer-app-0.10 gstreamer-video-0.10 gstreamer-interfaces-0.10 libcrypto libusb-1.0 openssl`-I$(TOP)/jni 
+INCLUDES=$(shell pkg-config --cflags gstreamer-0.10 gstreamer-app-0.10 gstreamer-video-0.10 gstreamer-interfaces-0.10 libcrypto libusb-1.0 openssl) -I$(TOP)/jni 
 CFLAGS= -g 
 CPPFLAGS=-fPIC
-LFLAGS= -g `pkg-config --libs gstreamer-0.10 gstreamer-app-0.10 gstreamer-video-0.10 gstreamer-interfaces-0.10 libcrypto libusb-1.0 openssl` -lSDL
+LFLAGS= -g $(shell pkg-config --libs gstreamer-0.10 gstreamer-app-0.10 gstreamer-video-0.10 gstreamer-interfaces-0.10 libcrypto libusb-1.0 openssl) -lSDL
 TOP = ..
 SRCS =	$(TOP)/jni/hu_aad.c	\
 	$(TOP)/jni/hu_aap.c	\
@@ -11,23 +11,23 @@ SRCS =	$(TOP)/jni/hu_aad.c	\
 	$(TOP)/jni/hu_usb.c	\
 	$(TOP)/jni/hu_uti.c	\
 	main.c
-OBJS = $(SRCS:.c=.o)
+OBJS = $(SRCS:.c=.x64.o)
+DEPS = $(SRCS:.c=.x64.d)
 APP = headunit
 
-.PHONY: depend clean
+.PHONY: clean
 
 all: $(APP)
 
 $(APP): $(OBJS)
 	$(CC) -o $(APP) $(OBJS) $(LFLAGS)
 
-.c.o:
-	$(CC) $(CFLAGS) $(INCLUDES) -c $<  -o $@
+%.x64.o : %.c
+	$(CC) -MD $(CFLAGS) $(INCLUDES) -c $<  -o $@
 
 clean:
-	rm -f $(OBJS) *~ $(APP)
+	rm -f $(OBJS) $(DEPS) *~ $(APP)
 
-depend: $(SRCS)
-	makedepend $^
+-include $(DEPS)
 
 # DO NOT DELETE

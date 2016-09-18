@@ -216,54 +216,30 @@ static int gst_pipeline_init(gst_app_t *app)
 
 	gst_init(NULL, NULL);
 
-	app->pipeline = (GstPipeline*)gst_pipeline_new("mypipeline");
+
+    app->pipeline = (GstPipeline*)gst_parse_launch("appsrc name=mysrc is-live=true block=false max-latency=100000 ! video/x-h264, width=800,height=480,framerate=30/1 ! decodebin2 name=mydecoder ! videoscale name=myconvert ! xvimagesink name=mysink", &error);
+
 	bus = gst_pipeline_get_bus(app->pipeline);
 	gst_bus_add_watch(bus, (GstBusFunc)bus_callback, app);
 	gst_object_unref(bus);
 
-	app->src = (GstAppSrc*)gst_element_factory_make("appsrc", "mysrc");
-	app->decoder = gst_element_factory_make("decodebin", "mydecoder");
-	app->convert = gst_element_factory_make("videoscale", "myconvert");
-	app->sink = gst_element_factory_make("xvimagesink", "myvsink");
+	app->src = gst_bin_get_by_name (GST_BIN (app->pipeline), "mysrc");
+	app->decoder = gst_bin_get_by_name (GST_BIN (app->pipeline), "mydecoder");
+	app->convert = gst_bin_get_by_name (GST_BIN (app->pipeline), "myconvert");
+	app->sink = gst_bin_get_by_name (GST_BIN (app->pipeline), "mysink");
 
 	g_assert(app->src);
 	g_assert(app->decoder);
 	g_assert(app->convert);
 	g_assert(app->sink);
 
-	g_object_set (G_OBJECT (app->src), "caps",
-	gst_caps_new_simple ("video/x-h264",
-				     "width", G_TYPE_INT, 800,
-				     "height", G_TYPE_INT, 480,
-				     "framerate", GST_TYPE_FRACTION, 30, 1,
-				     NULL), NULL);
-
-	g_object_set(G_OBJECT(app->src), "is-live", TRUE, "block", FALSE,"do-timestamp", TRUE, 
-				  "format",GST_FORMAT_TIME,NULL);
-
 	g_signal_connect(app->src, "need-data", G_CALLBACK(start_feed), app);
 	g_signal_connect(app->src, "enough-data", G_CALLBACK(stop_feed), app);
 	g_signal_connect(app->decoder, "pad-added",
 			G_CALLBACK(on_pad_added), app->decoder);
 
-	gst_bin_add_many(GST_BIN(app->pipeline), (GstElement*)app->src,
-			app->decoder, app->convert, app->sink, NULL);
-
-//	gst_bin_add_many(GST_BIN(app->pipeline), (GstElement*)app->src,
-//			app->decoder, app->sink, NULL);
-
-	if(!gst_element_link((GstElement*)app->src, app->decoder)){
-		g_warning("failed to link src anbd decoder");
-	}
-
-	if(!gst_element_link(app->convert, app->sink)){
-		g_warning("failed to link convert and sink");
-	}
-
-	gst_app_src_set_stream_type((GstAppSrc *)app->src, GST_APP_STREAM_TYPE_STREAM);
 	
-	
-	aud_pipeline = gst_parse_launch("appsrc name=audsrc ! audio/x-raw-int, signed=true, endianness=1234, depth=16, width=16, rate=48000, channels=2 ! alsasink ",&error);
+	aud_pipeline = gst_parse_launch("appsrc name=audsrc ! audio/x-raw-int, signed=true, endianness=1234, depth=16, width=16, rate=48000, channels=2 ! volume volume=0.5 ! alsasink buffer-time=400000",&error);
 
 	if (error != NULL) {
 		printf("could not construct pipeline: %s\n", error->message);
@@ -276,7 +252,7 @@ static int gst_pipeline_init(gst_app_t *app)
 	gst_app_src_set_stream_type((GstAppSrc *)aud_src, GST_APP_STREAM_TYPE_STREAM);
 
 
-	au1_pipeline = gst_parse_launch("appsrc name=au1src ! audio/x-raw-int, signed=true, endianness=1234, depth=16, width=16, rate=16000, channels=1 ! alsasink ",&error);
+	au1_pipeline = gst_parse_launch("appsrc name=au1src ! audio/x-raw-int, signed=true, endianness=1234, depth=16, width=16, rate=16000, channels=1 ! volume volume=0.5 ! alsasink buffer-time=400000 ",&error);
 
 	if (error != NULL) {
 		printf("could not construct pipeline: %s\n", error->message);
@@ -523,38 +499,11 @@ int nightmode = 0;
         }
         printf( "\n" );
     }
-
-//COMMANDER
-//UP:
-uint8_t cd_up1[] = { -128,0x01,0x08,0,0,0,0,0,0,0,0,0x14,0x22,0x0A,0x0A,0x08,0x08,0x13,0x10,0x01,0x18,0x00,0x20,0x00 };
-uint8_t cd_up2[] = { -128,0x01,0x08,0,0,0,0,0,0,0,0,0x14,0x22,0x0A,0x0A,0x08,0x08,0x13,0x10,0x00,0x18,0x00,0x20,0x00 };
-
-//DOWN:
-uint8_t cd_down1[] = { -128,0x01,0x08,0,0,0,0,0,0,0,0,0x14,0x22,0x0A,0x0A,0x08,0x08,0x14,0x10,0x01,0x18,0x00,0x20,0x00 };
-uint8_t cd_down2[] = { -128,0x01,0x08,0,0,0,0,0,0,0,0,0x14,0x22,0x0A,0x0A,0x08,0x08,0x14,0x10,0x00,0x18,0x00,0x20,0x00 };
-
-
-//LEFT:
-uint8_t cd_left1[] = { -128,0x01,0x08,0,0,0,0,0,0,0,0,0x14,0x22,0x0A,0x0A,0x08,0x08,0x15,0x10,0x01,0x18,0x00,0x20,0x00 };
-uint8_t cd_left2[] = { -128,0x01,0x08,0,0,0,0,0,0,0,0,0x14,0x22,0x0A,0x0A,0x08,0x08,0x15,0x10,0x00,0x18,0x00,0x20,0x00 };
-
-//RIGHT
-uint8_t cd_right1[] = { -128,0x01,0x08,0,0,0,0,0,0,0,0,0x14,0x22,0x0A,0x0A,0x08,0x08,0x16,0x10,0x01,0x18,0x00,0x20,0x00 };
-uint8_t cd_right2[] = { -128,0x01,0x08,0,0,0,0,0,0,0,0,0x14,0x22,0x0A,0x0A,0x08,0x08,0x16,0x10,0x00,0x18,0x00,0x20,0x00 };
-
 //LEFT turn
 uint8_t cd_lefturn[] = { -128,0x01,0x08,0,0,0,0,0,0,0,0,0x14,0x32,0x11,0x0A,0x0F,0x08,-128,-128,0x04,0x10,-1,-1,-1,-1,-1,-1,-1,-1,-1,0x01 };
 
 //RIGHT turn
 uint8_t cd_rightturn[] =  { -128,0x01,0x08,0,0,0,0,0,0,0,0,0x14,0x32,0x08,0x0A,0x06,0x08,-128,-128,0x04,0x10,0x01 };
-
-//BACK
-uint8_t cd_back1[]  =  { -128,0x01,0x08,0,0,0,0,0,0,0,0,0x14,0x22,0x0A,0x0A,0x08,0x08,0x04,0x10,0x01,0x18,0x00,0x20,0x00 };
-uint8_t cd_back2[]  =  { -128,0x01,0x08,0,0,0,0,0,0,0,0,0x14,0x22,0x0A,0x0A,0x08,0x08,0x04,0x10,0x00,0x18,0x00,0x20,0x00 };
-
-//ENTER
-uint8_t cd_enter1[] =  { -128,0x01,0x08,0,0,0,0,0,0,0,0,0x14,0x22,0x0A,0x0A,0x08,0x08,0x17,0x10,0x01,0x18,0x00,0x20,0x00 };
-uint8_t cd_enter2[] =  { -128,0x01,0x08,0,0,0,0,0,0,0,0,0x14,0x22,0x0A,0x0A,0x08,0x08,0x17,0x10,0x00,0x18,0x00,0x20,0x00 };
 
 
 gboolean sdl_poll_event(gpointer data)
@@ -581,6 +530,9 @@ gboolean sdl_poll_event(gpointer data)
 	struct timespec tp;
 
 	int ret;
+    uint8_t keyTempBuffer[1024];
+    size_t keyTempSize = 0;
+    static int baseIdx = 90;
 
 	if (SDL_PollEvent(&event) >= 0) {
 		switch (event.type) {
@@ -614,80 +566,101 @@ gboolean sdl_poll_event(gpointer data)
 			}
 			break;
 			case SDL_KEYDOWN:
-				PrintKeyInfo( &event.key );
-				key = &event.key;
-				char *cmdkey = SDL_GetKeyName( key->keysym.sym );
-				if (strcmp(cmdkey, "up") == 0) {
-					clock_gettime(CLOCK_REALTIME, &tp);
-					varint_encode(tp.tv_sec * 1000000000 +tp.tv_nsec,cd_up1,3);
-					hu_aap_enc_send (0,AA_CH_TOU, cd_up1, sizeof(cd_up1));
-					clock_gettime(CLOCK_REALTIME, &tp);
-					varint_encode(tp.tv_sec * 1000000000 +tp.tv_nsec,cd_up2,3);
-					hu_aap_enc_send (0,AA_CH_TOU, cd_up2, sizeof(cd_up2));
-				}			
-				if (strcmp(cmdkey, "down") == 0) {
-					clock_gettime(CLOCK_REALTIME, &tp);
-					varint_encode(tp.tv_sec * 1000000000 +tp.tv_nsec,cd_down1,3);
-					hu_aap_enc_send (0,AA_CH_TOU, cd_down1, sizeof(cd_down1));
-					clock_gettime(CLOCK_REALTIME, &tp);
-					varint_encode(tp.tv_sec * 1000000000 +tp.tv_nsec,cd_down2,3);
-					hu_aap_enc_send (0,AA_CH_TOU, cd_down2, sizeof(cd_down2));
-				}
-								
-				if (strcmp(cmdkey, "left") == 0) {
-					clock_gettime(CLOCK_REALTIME, &tp);
-					varint_encode(tp.tv_sec * 1000000000 +tp.tv_nsec,cd_left1,3);
-					hu_aap_enc_send (0,AA_CH_TOU, cd_left1, sizeof(cd_left1));
-					clock_gettime(CLOCK_REALTIME, &tp);
-					varint_encode(tp.tv_sec * 1000000000 +tp.tv_nsec,cd_left2,3);
-					hu_aap_enc_send (0,AA_CH_TOU, cd_left2, sizeof(cd_left2));
-				}
-				
-				if (strcmp(cmdkey, "right") == 0) {
-					clock_gettime(CLOCK_REALTIME, &tp);
-					varint_encode(tp.tv_sec * 1000000000 +tp.tv_nsec,cd_right1,3);
-					hu_aap_enc_send (0,AA_CH_TOU, cd_right1, sizeof(cd_right1));
-					clock_gettime(CLOCK_REALTIME, &tp);
-					varint_encode(tp.tv_sec * 1000000000 +tp.tv_nsec,cd_right2,3);
-					hu_aap_enc_send (0,AA_CH_TOU, cd_right2, sizeof(cd_right2));
-				}
-				
-				if (strcmp(cmdkey, "1") == 0) {
-					clock_gettime(CLOCK_REALTIME, &tp);
-					varint_encode(tp.tv_sec * 1000000000 +tp.tv_nsec,cd_lefturn,3);
-					hu_aap_enc_send (0,AA_CH_TOU, cd_lefturn, sizeof(cd_lefturn));
-				}
-				
-				if (strcmp(cmdkey, "2") == 0) {
-					clock_gettime(CLOCK_REALTIME, &tp);
-					varint_encode(tp.tv_sec * 1000000000 +tp.tv_nsec,cd_rightturn,3);
-					hu_aap_enc_send (0,AA_CH_TOU, cd_rightturn, sizeof(cd_rightturn));
-				}
+            case SDL_KEYUP:
+                if (event.key.keysym.scancode != 0)
+                {
+                    static uint64_t timestamp = 0;
+                    timestamp += 10;
+                    PrintKeyInfo( &event.key );
+                    key = &event.key;
+                    char *cmdkey = SDL_GetKeyName( key->keysym.sym );
+                    if (strcmp(cmdkey, "up") == 0) {
+                        clock_gettime(CLOCK_REALTIME, &tp);
+                        keyTempSize = hu_fill_button_message(keyTempBuffer, timestamp, HUIB_UP, event.type == SDL_KEYDOWN);
+                        hu_aap_enc_send (0,AA_CH_TOU, keyTempBuffer, keyTempSize);
+                    }			
+                    if (strcmp(cmdkey, "down") == 0) {
+                        clock_gettime(CLOCK_REALTIME, &tp);
+                        keyTempSize = hu_fill_button_message(keyTempBuffer, timestamp, HUIB_DOWN, event.type == SDL_KEYDOWN);
+                        hu_aap_enc_send (0,AA_CH_TOU, keyTempBuffer, keyTempSize);
 
-				printf("\n # %s #\n",cmdkey);
+                    }
+                                    
+                    if (strcmp(cmdkey, "left") == 0) {
+                        clock_gettime(CLOCK_REALTIME, &tp);
+                        keyTempSize = hu_fill_button_message(keyTempBuffer, timestamp, HUIB_LEFT, event.type == SDL_KEYDOWN);
+                        hu_aap_enc_send (0,AA_CH_TOU, keyTempBuffer, keyTempSize);
+                    }
+                    
+                    if (strcmp(cmdkey, "right") == 0) {
+                        clock_gettime(CLOCK_REALTIME, &tp);
+                        keyTempSize = hu_fill_button_message(keyTempBuffer, timestamp, HUIB_RIGHT, event.type == SDL_KEYDOWN);
+                        hu_aap_enc_send (0,AA_CH_TOU, keyTempBuffer, keyTempSize);
 
-				if (strcmp(cmdkey, "return") == 0) {
-					printf("\n enter pressed \n");
-					clock_gettime(CLOCK_REALTIME, &tp);
-					varint_encode(tp.tv_sec * 1000000000 +tp.tv_nsec,cd_enter1,3);
-					hu_aap_enc_send (0,AA_CH_TOU, cd_enter1, sizeof(cd_enter1));
-					clock_gettime(CLOCK_REALTIME, &tp);
-					varint_encode(tp.tv_sec * 1000000000 +tp.tv_nsec,cd_enter2,3);
-					hu_aap_enc_send (0,AA_CH_TOU, cd_enter2, sizeof(cd_enter2));
-				}
+                    }
+                    
+//                    if (strcmp(cmdkey, "1") == 0) {
+//                        clock_gettime(CLOCK_REALTIME, &tp);
+//                        //varint_encode(timestamp,cd_lefturn,3);
+//                        hu_aap_enc_send (0,AA_CH_TOU, cd_lefturn, sizeof(cd_lefturn));
+//                    }
+//                    
+//                    if (strcmp(cmdkey, "2") == 0) {
+//                        clock_gettime(CLOCK_REALTIME, &tp);
+//                        //varint_encode(timestamp,cd_rightturn,3);
+//                        hu_aap_enc_send (0,AA_CH_TOU, cd_rightturn, sizeof(cd_rightturn));
+//                    }
 
-				if (strcmp(cmdkey, "backspace") == 0) {
-					clock_gettime(CLOCK_REALTIME, &tp);
-					varint_encode(tp.tv_sec * 1000000000 +tp.tv_nsec,cd_back1,3);
-					hu_aap_enc_send (0,AA_CH_TOU, cd_back1, sizeof(cd_back1));
-					clock_gettime(CLOCK_REALTIME, &tp);
-					varint_encode(tp.tv_sec * 1000000000 +tp.tv_nsec,cd_back2,3);
-					hu_aap_enc_send (0,AA_CH_TOU, cd_back2, sizeof(cd_back2));
-				}
-																
-				break;
-			case SDL_KEYUP:
-				PrintKeyInfo( &event.key );
+
+                    if (strcmp(cmdkey, "q") == 0 && event.type == SDL_KEYDOWN) {
+                        baseIdx+=10;
+                        printf("nextTen %i\n", baseIdx);
+                    }
+                    
+                    if (cmdkey[0] >= '0' && cmdkey[0] <= '9')
+                    {
+                        int code = baseIdx + cmdkey[0] - '0';
+                        printf("%i\n", code);
+                        clock_gettime(CLOCK_REALTIME, &tp);
+                        keyTempSize = hu_fill_button_message(keyTempBuffer, timestamp, code, event.type == SDL_KEYDOWN);
+                        hu_aap_enc_send (0,AA_CH_TOU, keyTempBuffer, keyTempSize);
+                    }
+
+                    if (strcmp(cmdkey, "m") == 0) {
+                        clock_gettime(CLOCK_REALTIME, &tp);
+                        keyTempSize = hu_fill_button_message(keyTempBuffer, timestamp, HUIB_MIC, event.type == SDL_KEYDOWN);
+                        hu_aap_enc_send (0,AA_CH_TOU, keyTempBuffer, keyTempSize);
+                    }
+
+                    if (strcmp(cmdkey, "p") == 0) {
+                        clock_gettime(CLOCK_REALTIME, &tp);
+                        keyTempSize = hu_fill_button_message(keyTempBuffer, timestamp, HUIB_PREV, event.type == SDL_KEYDOWN);
+                        hu_aap_enc_send (0,AA_CH_TOU, keyTempBuffer, keyTempSize);
+
+                    }
+
+                    if (strcmp(cmdkey, "n") == 0) {
+                        clock_gettime(CLOCK_REALTIME, &tp);
+                        keyTempSize = hu_fill_button_message(keyTempBuffer, timestamp, HUIB_NEXT, event.type == SDL_KEYDOWN);
+                        hu_aap_enc_send (0,AA_CH_TOU, keyTempBuffer, keyTempSize);
+                    }
+
+                    printf("\n # %s #\n",cmdkey);
+
+                    if (strcmp(cmdkey, "return") == 0) {
+                        printf("\n enter pressed \n");
+                        clock_gettime(CLOCK_REALTIME, &tp);
+                        keyTempSize = hu_fill_button_message(keyTempBuffer, timestamp, HUIB_ENTER, event.type == SDL_KEYDOWN);
+                        hu_aap_enc_send (0,AA_CH_TOU, keyTempBuffer, keyTempSize);
+                    }
+
+                    if (strcmp(cmdkey, "backspace") == 0) {
+                        clock_gettime(CLOCK_REALTIME, &tp);
+                        keyTempSize = hu_fill_button_message(keyTempBuffer, timestamp, HUIB_BACK, event.type == SDL_KEYDOWN);
+                        hu_aap_enc_send (0,AA_CH_TOU, keyTempBuffer, keyTempSize);
+
+                    }
+				}												
 				break;
 
 		case SDL_QUIT:
@@ -950,7 +923,8 @@ int main (int argc, char *argv[])
 
 	SDL_Init(SDL_INIT_EVERYTHING);
 	SDL_WM_SetCaption("Android Auto", NULL);
-	SDL_Surface *screen = SDL_SetVideoMode(800, 480, 16, SDL_HWSURFACE);
+    //emulate the 16:9 streching of the CMU screen
+	SDL_Surface *screen = SDL_SetVideoMode(853, 480, 16, SDL_HWSURFACE);
 
 	struct SDL_SysWMinfo wmInfo;
 	SDL_VERSION(&wmInfo.version);

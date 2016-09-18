@@ -225,7 +225,7 @@ static int gst_pipeline_init(gst_app_t *app)
 
 //	app->pipeline = (GstPipeline*)gst_parse_launch("appsrc name=mysrc is-live=true block=false max-latency=1000000 ! h264parse ! vpudec low-latency=true framedrop=true framedrop-level-mask=0x200 ! mfw_v4lsink max-lateness=1000000000 sync=false async=false", &error);
 
-	app->pipeline = (GstPipeline*)gst_parse_launch("appsrc name=mysrc is-live=true block=false max-latency=1000000 ! h264parse ! vpudec low-latency=true framedrop=true framedrop-level-mask=0x200 ! mfw_isink name=mysink axis-left=0 axis-top=0 disp-width=800 disp-height=480 max-lateness=1000000000 sync=false async=false", &error);
+    app->pipeline = (GstPipeline*)gst_parse_launch("appsrc name=mysrc is-live=true block=false max-latency=1000000 ! h264parse ! vpudec low-latency=true framedrop=true framedrop-level-mask=0x200 ! mfw_isink name=mysink axis-left=25 axis-top=0 disp-width=751 disp-height=480 max-lateness=1000000000 sync=false async=false", &error);
 		
 	if (error != NULL) {
 		printf("could not construct pipeline: %s\n", error->message);
@@ -246,7 +246,7 @@ static int gst_pipeline_init(gst_app_t *app)
 		
 	g_signal_connect(app->src, "enough-data", G_CALLBACK(stop_feed), app);
 
-	aud_pipeline = gst_parse_launch("appsrc name=audsrc is-live=true block=false max-latency=1000000 ! audio/x-raw-int, signed=true, endianness=1234, depth=16, width=16, rate=48000, channels=2 ! alsasink ",&error);
+	aud_pipeline = gst_parse_launch("appsrc name=audsrc is-live=true block=false max-latency=1000000 ! audio/x-raw-int, signed=true, endianness=1234, depth=16, width=16, rate=48000, channels=2 ! volume volume=0.4 ! alsasink ",&error);
 
 	if (error != NULL) {
 		printf("could not construct pipeline: %s\n", error->message);
@@ -259,7 +259,7 @@ static int gst_pipeline_init(gst_app_t *app)
 	gst_app_src_set_stream_type((GstAppSrc *)aud_src, GST_APP_STREAM_TYPE_STREAM);
 
 
-	au1_pipeline = gst_parse_launch("appsrc name=au1src is-live=true block=false max-latency=1000000 ! audio/x-raw-int, signed=true, endianness=1234, depth=16, width=16, rate=16000, channels=1 ! alsasink ",&error);
+	au1_pipeline = gst_parse_launch("appsrc name=au1src is-live=true block=false max-latency=1000000 ! audio/x-raw-int, signed=true, endianness=1234, depth=16, width=16, rate=16000, channels=1 ! volume volume=0.4 ! alsasink ",&error);
 
 	if (error != NULL) {
 		printf("could not construct pipeline: %s\n", error->message);
@@ -541,7 +541,16 @@ gboolean touch_poll_event(gpointer data)
 			case EV_ABS:
 				switch (event[i].code) {
 					case ABS_MT_POSITION_X:
-						mTouch.x = event[i].value * 800/4095;
+                        {
+                            //account for letterboxing
+                            printf("input x %i\n", event[i].value);
+                            float floatPixel = ((event[i].value - 100) / 4095.0f) * 800.0f;
+                            const floatBorder = 25.0f / 800.0f;
+                            floatPixel = (floatPixel / 750.0f) - floatBorder;
+                                                        
+                            mTouch.x = (int)(floatPixel * 800.0f);
+                            printf("touch x %i\n", mTouch.x);
+                        }
 						break;
 					case ABS_MT_POSITION_Y:
 						mTouch.y = event[i].value * 480/4095;
@@ -574,39 +583,6 @@ gboolean touch_poll_event(gpointer data)
 	
 	return TRUE;
 }
-
-
-//COMMANDER
-//UP:
-uint8_t cd_up1[] = { -128,0x01,0x08,0,0,0,0,0,0,0,0,0x14,0x22,0x0A,0x0A,0x08,0x08,0x13,0x10,0x01,0x18,0x00,0x20,0x00 };
-uint8_t cd_up2[] = { -128,0x01,0x08,0,0,0,0,0,0,0,0,0x14,0x22,0x0A,0x0A,0x08,0x08,0x13,0x10,0x00,0x18,0x00,0x20,0x00 };
-
-//DOWN:
-uint8_t cd_down1[] = { -128,0x01,0x08,0,0,0,0,0,0,0,0,0x14,0x22,0x0A,0x0A,0x08,0x08,0x14,0x10,0x01,0x18,0x00,0x20,0x00 };
-uint8_t cd_down2[] = { -128,0x01,0x08,0,0,0,0,0,0,0,0,0x14,0x22,0x0A,0x0A,0x08,0x08,0x14,0x10,0x00,0x18,0x00,0x20,0x00 };
-
-
-//LEFT:
-uint8_t cd_left1[] = { -128,0x01,0x08,0,0,0,0,0,0,0,0,0x14,0x22,0x0A,0x0A,0x08,0x08,0x15,0x10,0x01,0x18,0x00,0x20,0x00 };
-uint8_t cd_left2[] = { -128,0x01,0x08,0,0,0,0,0,0,0,0,0x14,0x22,0x0A,0x0A,0x08,0x08,0x15,0x10,0x00,0x18,0x00,0x20,0x00 };
-
-//RIGHT
-uint8_t cd_right1[] = { -128,0x01,0x08,0,0,0,0,0,0,0,0,0x14,0x22,0x0A,0x0A,0x08,0x08,0x16,0x10,0x01,0x18,0x00,0x20,0x00 };
-uint8_t cd_right2[] = { -128,0x01,0x08,0,0,0,0,0,0,0,0,0x14,0x22,0x0A,0x0A,0x08,0x08,0x16,0x10,0x00,0x18,0x00,0x20,0x00 };
-
-//LEFT turn
-uint8_t cd_lefturn[] = { -128,0x01,0x08,0,0,0,0,0,0,0,0,0x14,0x32,0x11,0x0A,0x0F,0x08,-128,-128,0x04,0x10,-1,-1,-1,-1,-1,-1,-1,-1,-1,0x01 };
-
-//RIGHT turn
-uint8_t cd_rightturn[] =  { -128,0x01,0x08,0,0,0,0,0,0,0,0,0x14,0x32,0x08,0x0A,0x06,0x08,-128,-128,0x04,0x10,0x01 };
-
-//BACK
-uint8_t cd_back1[]  =  { -128,0x01,0x08,0,0,0,0,0,0,0,0,0x14,0x22,0x0A,0x0A,0x08,0x08,0x04,0x10,0x01,0x18,0x00,0x20,0x00 };
-uint8_t cd_back2[]  =  { -128,0x01,0x08,0,0,0,0,0,0,0,0,0x14,0x22,0x0A,0x0A,0x08,0x08,0x04,0x10,0x00,0x18,0x00,0x20,0x00 };
-
-//ENTER
-uint8_t cd_enter1[] =  { -128,0x01,0x08,0,0,0,0,0,0,0,0,0x14,0x22,0x0A,0x0A,0x08,0x08,0x17,0x10,0x01,0x18,0x00,0x20,0x00 };
-uint8_t cd_enter2[] =  { -128,0x01,0x08,0,0,0,0,0,0,0,0,0x14,0x22,0x0A,0x0A,0x08,0x08,0x17,0x10,0x00,0x18,0x00,0x20,0x00 };
 
 GMainLoop *mainloop;
 
@@ -678,7 +654,7 @@ inline int dbus_message_decode_input_event(DBusMessageIter *iter, struct input_e
 	return TRUE;
 }
 
-static GSourceFunc delayedShouldDisplayTrue(gpointer data)
+static gboolean delayedShouldDisplayTrue(gpointer data)
 {
 	gst_app_t *app = &gst_app;
 	g_object_set(G_OBJECT(app->sink), "should-display", TRUE, NULL);
@@ -687,13 +663,10 @@ static GSourceFunc delayedShouldDisplayTrue(gpointer data)
 	return FALSE;
 }
 
-uint8_t micButton[] =  {0x80, 0x01, 0x08, 0xe8, 0x9f, 0x9d, 0xd0, 0xe9, 0x96, 0xe5, 0x8b, 0x14, 0x22, 0x0A, 0x0A, 0x08, 0x08, 0x54, 0x10, 0x00, 0x18, 0x00, 0x20, 0x00};
-uint8_t nextButton[] = {0x80, 0x01, 0x08, 0xe8, 0x9f, 0x9d, 0xd0, 0xe9, 0x96, 0xe5, 0x8b, 0x14, 0x22, 0x0A, 0x0A, 0x08, 0x08, 0x57, 0x10, 0x01, 0x18, 0x00, 0x20, 0x00};
-uint8_t prevButton[] = {0x80, 0x01, 0x08, 0xe8, 0x9f, 0x9d, 0xd0, 0xe9, 0x96, 0xe5, 0x8b, 0x14, 0x22, 0x0A, 0x0A, 0x08, 0x08, 0x58, 0x10, 0x01, 0x18, 0x00, 0x20, 0x00};
-
 
 static DBusHandlerResult handle_dbus_message(DBusConnection *c, DBusMessage *message, void *p)
 {
+    struct timespec tp;
 	gst_app_t *app = &gst_app;
 	DBusMessageIter iter;
 
@@ -705,31 +678,100 @@ static DBusHandlerResult handle_dbus_message(DBusConnection *c, DBusMessage *mes
 		dbus_message_decode_input_event(&iter, &event);
 
 		//key press
-		if (event.type == EV_KEY && event.value == 1) {
+		if (event.type == EV_KEY && (event.value == 1 || event.value == 0)) {
+            
+            clock_gettime(CLOCK_REALTIME, &tp);
+            uint64_t timestamp = tp.tv_sec * 1000000000 +tp.tv_nsec;
+            uint8_t* keyTempBuffer = 0;
+            int keyTempSize = 0;
+            
+            printf("Key code %i value %i\n", (int)event.code, (int)event.value);
 			switch (event.code) {
 				case KEY_G:
-					queueSend(0,AA_CH_TOU, micButton, sizeof(micButton), FALSE);
+                    printf("KEY_G\n");
+                    keyTempBuffer = malloc(512);
+                    keyTempSize = hu_fill_button_message(keyTempBuffer, timestamp, HUIB_MIC, event.value == 1);
+                    queueSend (0,AA_CH_TOU, keyTempBuffer, keyTempSize, TRUE);
+					break;
+                //Make the music button play/pause
+                case KEY_E:
+                    printf("KEY_E\n");
+                    keyTempBuffer = malloc(512);
+                    keyTempSize = hu_fill_button_message(keyTempBuffer, timestamp, HUIB_PLAYPAUSE, event.value == 1);
+                    queueSend (0,AA_CH_TOU, keyTempBuffer, keyTempSize, TRUE);
 					break;
 				case KEY_LEFTBRACE:
-					queueSend(0,AA_CH_TOU, nextButton, sizeof(nextButton), FALSE);
+                    printf("KEY_LEFTBRACE\n");
+                    keyTempBuffer = malloc(512);
+					keyTempSize = hu_fill_button_message(keyTempBuffer, timestamp, HUIB_NEXT, event.value == 1);
+                    queueSend (0,AA_CH_TOU, keyTempBuffer, keyTempSize, TRUE);
 					break;
 				case KEY_RIGHTBRACE:
-					queueSend(0,AA_CH_TOU, prevButton, sizeof(prevButton), FALSE);
+                    printf("KEY_RIGHTBRACE\n");
+                    keyTempBuffer = malloc(512);
+					keyTempSize = hu_fill_button_message(keyTempBuffer, timestamp, HUIB_PREV, event.value == 1);
+                    queueSend (0,AA_CH_TOU, keyTempBuffer, keyTempSize, TRUE);
+					break;
+                case KEY_BACKSPACE:
+                    printf("KEY_BACKSPACE\n");
+                    keyTempBuffer = malloc(512);
+					keyTempSize = hu_fill_button_message(keyTempBuffer, timestamp, HUIB_BACK, event.value == 1);
+                    queueSend (0,AA_CH_TOU, keyTempBuffer, keyTempSize, TRUE);
+					break;
+                case KEY_ENTER:
+                    printf("KEY_ENTER\n");
+                    keyTempBuffer = malloc(512);
+					keyTempSize = hu_fill_button_message(keyTempBuffer, timestamp, HUIB_ENTER, event.value == 1);
+                    queueSend (0,AA_CH_TOU, keyTempBuffer, keyTempSize, TRUE);
+					break;
+                case KEY_LEFT:
+                case KEY_N:
+                    printf("KEY_LEFT\n");
+                    keyTempBuffer = malloc(512);
+					keyTempSize = hu_fill_button_message(keyTempBuffer, timestamp, HUIB_LEFT, event.value == 1);
+                    queueSend (0,AA_CH_TOU, keyTempBuffer, keyTempSize, TRUE);
+					break;
+                case KEY_RIGHT:
+                case KEY_M:
+                    printf("KEY_RIGHT\n");
+                    keyTempBuffer = malloc(512);
+					keyTempSize = hu_fill_button_message(keyTempBuffer, timestamp, HUIB_RIGHT, event.value == 1);
+                    queueSend (0,AA_CH_TOU, keyTempBuffer, keyTempSize, TRUE);
+					break;
+                case KEY_UP:
+                    printf("KEY_UP\n");
+                    keyTempBuffer = malloc(512);
+					keyTempSize = hu_fill_button_message(keyTempBuffer, timestamp, HUIB_UP, event.value == 1);
+                    queueSend (0,AA_CH_TOU, keyTempBuffer, keyTempSize, TRUE);
+					break;
+                case KEY_DOWN:
+                    printf("KEY_DOWN\n");
+                    keyTempBuffer = malloc(512);
+					keyTempSize = hu_fill_button_message(keyTempBuffer, timestamp, HUIB_DOWN, event.value == 1);
+                    queueSend (0,AA_CH_TOU, keyTempBuffer, keyTempSize, FALSE);
 					break;
 				case KEY_HOME:
-					g_main_loop_quit (mainloop);
+                    printf("KEY_HOME\n");
+                    if (event.value == 1)
+                    {
+                        g_main_loop_quit (mainloop);
+                    }
 					break;
 				case KEY_R:
-					if (displayStatus)
-					{
-						g_object_set(G_OBJECT(app->sink), "should-display", FALSE, NULL);
-						displayStatus = FALSE;
-					}
-					else
-					{
-						g_object_set(G_OBJECT(app->sink), "should-display", TRUE, NULL);
-						displayStatus = TRUE;
-					}
+                    printf("KEY_R\n");
+                    if (event.value == 1)
+                    {
+                        if (displayStatus)
+                        {
+                            g_object_set(G_OBJECT(app->sink), "should-display", FALSE, NULL);
+                            displayStatus = FALSE;
+                        }
+                        else
+                        {
+                            g_object_set(G_OBJECT(app->sink), "should-display", TRUE, NULL);
+                            displayStatus = TRUE;
+                        }
+                    }
 					break;
 			}
 		}

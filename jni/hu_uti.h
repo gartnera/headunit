@@ -250,3 +250,23 @@ strlcpy(char       *dst,        /* O - Destination string */
 
 //#endif  //#ifndef UTILS_INCLUDED
 
+typedef enum
+{
+    HUIB_UP = 0x13,
+    HUIB_DOWN = 0x14,
+    HUIB_LEFT = 0x15,
+    HUIB_RIGHT = 0x16,
+    HUIB_BACK = 0x04,
+    HUIB_ENTER = 0x17,
+    HUIB_MIC = 0x54,
+    HUIB_PLAYPAUSE = 0x55,
+    HUIB_NEXT = 0x57,
+    HUIB_PREV = 0x58,
+    HUIB_PHONE = 0x5,
+    HUIB_START = 126,
+    HUIB_STOP = 127,
+    
+}  HU_INPUT_BUTTON;
+
+
+int hu_fill_button_message(uint8_t* buffer, uint64_t timeStamp, HU_INPUT_BUTTON button, int isPress);
