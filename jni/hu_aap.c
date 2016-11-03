@@ -356,6 +356,8 @@ public final class MsgMediaSinkService extends k                        // bd/Ms
 // 04-22 03:43:38.049 D/CAR.SERVICE( 4306): onCarInfo com.google.android.gms.car.CarInfoInternal[dbId=0,manufacturer=A,model=B,headUnitProtocolVersion=1.1,modelYear=C,vehicleId=null,
 // bluetoothAllowed=false,hideProjectedClock=false,driverPosition=0,headUnitMake=E,headUnitModel=F,headUnitSoftwareBuild=G,headUnitSoftwareVersion=H,canPlayNativeMediaDuringVr=false]
 
+		      //Missing piece of the puzzle to have unlimited browsing while parked:
+		      0x0A, 0x0F, 0x08, 0x07, 0x2A, 0x0B, 0x08, 0x01, 0x12, 0x07, 0x08, 0x80, 0x7D, 0x10, 0x10, 0x18, 0x01,
 
 //*
             // CH 4 Output Audio Sink:
