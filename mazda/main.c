@@ -225,7 +225,7 @@ static int gst_pipeline_init(gst_app_t *app)
 
 //	app->pipeline = (GstPipeline*)gst_parse_launch("appsrc name=mysrc is-live=true block=false max-latency=1000000 ! h264parse ! vpudec low-latency=true framedrop=true framedrop-level-mask=0x200 ! mfw_v4lsink max-lateness=1000000000 sync=false async=false", &error);
 
-    app->pipeline = (GstPipeline*)gst_parse_launch("appsrc name=mysrc is-live=true block=false max-latency=1000000 ! h264parse ! vpudec low-latency=true framedrop=true framedrop-level-mask=0x200 ! mfw_isink name=mysink axis-left=25 axis-top=0 disp-width=751 disp-height=480 max-lateness=1000000000 sync=false async=false", &error);
+    app->pipeline = (GstPipeline*)gst_parse_launch("appsrc name=mysrc is-live=true block=false max-latency=1000000 ! h264parse ! vpudec low-latency=true framedrop=true framedrop-level-mask=0x200 ! mfw_isink name=mysink axis-left=0 axis-top=0 disp-width=800 disp-height=480 max-lateness=1000000000 sync=false async=false", &error);
 		
 	if (error != NULL) {
 		printf("could not construct pipeline: %s\n", error->message);
@@ -541,16 +541,7 @@ gboolean touch_poll_event(gpointer data)
 			case EV_ABS:
 				switch (event[i].code) {
 					case ABS_MT_POSITION_X:
-                        {
-                            //account for letterboxing
-                            printf("input x %i\n", event[i].value);
-                            float floatPixel = ((event[i].value - 100) / 4095.0f) * 800.0f;
-                            const floatBorder = 25.0f / 800.0f;
-                            floatPixel = (floatPixel / 750.0f) - floatBorder;
-                                                        
-                            mTouch.x = (int)(floatPixel * 800.0f);
-                            printf("touch x %i\n", mTouch.x);
-                        }
+						mTouch.x = event[i].value * 800/4095;
 						break;
 					case ABS_MT_POSITION_Y:
 						mTouch.y = event[i].value * 480/4095;
