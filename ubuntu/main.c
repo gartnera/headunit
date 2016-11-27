@@ -368,7 +368,7 @@ static int aa_touch_event(uint8_t action, int x, int y) {
 	buf = (uint8_t *)malloc(TS_MAX_REQ_SZ);
 	if(!buf) {
 		printf("Failed to allocate touchscreen event buffer\n");
-		return;
+		return -1;
 	}
 
 	/* Fetch the time stamp */

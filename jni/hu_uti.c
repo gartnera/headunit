@@ -1,14 +1,6 @@
+#define LOGTAG "hu_uti"
 
-    // Utilities: Used by many
-
-//#ifndef UTILS_INCLUDED
-
-//  #define UTILS_INCLUDED
-
-  //#define  GENERIC_CLIENT
-
-  #define LOGTAG "hu_uti"
-  #include "hu_uti.h"
+#include "hu_uti.h"
 
 #ifndef NDEBUG
   char * state_get (int state) {
@@ -32,6 +24,8 @@
   #include <stdlib.h>
   #include <stdarg.h>
   #include <stdint.h>
+  #include <unistd.h>
+  #include <time.h>
 
   #include <string.h>
   #include <signal.h>

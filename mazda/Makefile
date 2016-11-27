@@ -10,6 +10,7 @@ SRCS =	$(TOP)/jni/hu_aad.c	\
         $(TOP)/jni/hu_ssl.c	\
 	$(TOP)/jni/hu_usb.c	\
 	$(TOP)/jni/hu_uti.c	\
+	$(TOP)/jni/c_utils.c	\
 	main.c
 OBJS = $(SRCS:.c=.o)
 APP = headunit
