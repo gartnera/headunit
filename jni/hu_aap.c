@@ -219,176 +219,41 @@
   }
 
 
-    byte sd_buf [] = {0, 6,        //8, 0};                                            // Svc Disc Rsp = 6
-/*
-cq  (co[  (str  (str  (str  (str  (int  (str  (str  (str  (str  (boo  (boo    MsgServiceDiscoveryResponse
+byte sd_buf []={0x00, 0x06, 
+    //Touch+input CHANNEL
+    //This commented line is touchscreen only, active line is rotary input: 0x0A, 0x0F, 0x08, 0x01, 0x22, 0x0B, 0x0A, 0x01, 0x54, 0x12, 0x06, 0x08, 0xA0, 0x06, 0x10, 0xE0, 0x03, 
+    0x0a, 0x12, 0x08, AA_CH_TOU, 0x22, 0x0e, 0x0a, 0x0c, 0x01, 0x02, 0x04, 0x13, 0x14, 0x15, 0x16, 0x17, 0x54, 0x80, 0x80, 0x04,
 
-  co  int (cm (bd (ak (bi (m  (ce (bq (bb (cb (av (cy (ad       co[] a()      MsgAllServices
+    // SENSOR CHANNEL
+    0x0A, 0x10, 0x08, AA_CH_SEN, 0x12, 0x0C, 0x0A, 0x02, 0x08, 0x01, 0x0A, 0x02, 0x08, 0x0A, 0x0A, 0x02, 0x08, 0x0D,
+    // Video CHANNEL
+    0x0A, 0x15, 0x08, AA_CH_VID, 0x1A, 0x11, 0x08, 0x03, 0x22, 0x0D, 0x08, 0x01, 0x10, 0x02, 0x18, 0x00, 0x20, 0x00, 0x28, -96 /** DPI, default = -96, -128 means 130 DPI **/, 0x01, 0x30, 0x00, 
+    // MIC CHANNEL
+    0x0A, 4+4+7,0x08, AA_CH_MIC, 0x2A, 4+7, 0x08, 1,    0x12, 7,    0x08, -128, 0x7d, 0x10, 0x10, 0x18, 1,
 
-    cm  (cn[                                                                  MsgSensors
-      cn  int                                                   cn[] a()      MsgSensorSourceService  Fix name to MsgSensor
+    // CAR DEFINITION
+    0x12, 13, 'M', 'a', 'z', 'd', 'a', ' ', 'C', 'o', 'n', 'n', 'e', 'c', 't', //1, 'A', // Car Manuf          Part of "remembered car"
+    0x1A, 6, 'M', 'a', 'z', 'd', 'a', '6', //1, 'B', // Car Model
+    0x22, 4, '2', '0', '1', '6',//1, 'C', // Car Year           Part of "remembered car"
+    0x2A, 4, '0', '0', '0', '1',//1, 'D', // Car Serial     Not Part of "remembered car" ??     (vehicleId=null)
+    0x30, 1,  // driverPosition
+    0x3A, 5, 'M', 'a', 'z', 'd', 'a', //1, 'E', // HU  Make / Manuf
+    0x42, 7, 'C', 'o', 'n', 'n', 'e', 'c', 't', //1, 'F', // HU  Model
+    0x4A, 4, 'S', 'W', 'B', '1',//1, 'G', // HU  SoftwareBuild
+    0x52, 4, 'S', 'W', 'V', '1',//1, 'H', // HU  SoftwareVersion
+    0x58, 0, // ? bool (or int )    canPlayNativeMediaDuringVr
+    0x60, 0, // mHideProjectedClock     1 = True = Hide
 
-    bd  (int  (int  (f[ (cz[  (boo                                            MsgMediaSinkService
-       f  int   int   int                                        f[] a()      MsgAudCfg   See same below
-      cz  (int  (int  (int  (int  (int  (int                    cz[] a()      MsgVidCfg
+  //THE LAST 3 CHANNEL KEEP THEM HERE SO WE CAN EXCLUDE THEM IF NEED BE.
 
-    ak  (int[ (am[  (al[                                                      MsgInputSourceService   int[] = keycodes    Graphics Points ?
-      am  int   int                                             am[] a()      TouchScreen width, height
-      al  int   int                                             al[] a()      TouchPad    width, height
+  // AUDIO 2
+  0x0A, 4+6+7, 0x08, AA_CH_AU2, 0x1A, 6+7, 0x08, 1,  0x10, 2, 0x1A, 7, 0x08, -128, 0x7d,         0x10, 0x10,   0x18, 1,
+  // AUDIO 2
+  0x0A, 4+6+7, 0x08, AA_CH_AU1, 0x1A, 6+7, 0x08, 1,  0x10, 1, 0x1A, 7, 0x08, -128, 0x7d,         0x10, 0x10,   0x18, 1,
+  // MAIN AUDIO
+  0x0A, 4+6+8, 0x08, AA_CH_AUD, 0x1A, 6+8, 0x08, 1,  0x10, 3, 0x1A, 8, 0x08, -128,   -9, 0x02,   0x10, 0x10,   0x18, 02,
 
-Audio Config:
-  sampleRate
-  channelConfig
-  audioFormat
-
-public final class MsgMediaSinkService extends k                        // bd/MsgMediaSinkService extends k/com.google.protobuf.nano.MessageNano
-{
-  public int      a                 = 0;                                // a
-  public int      mCodecType        = 1;                                // b
-  public int      mAudioStreamType  = 1;                                // c
-  public f[]      mAudioStreams     = f.a();                            // f[]:d    a:samplingRate    b:numBits     c:channels
-  public cz[]     mCodecs           = cz.a();                           // cz[]:e   b:codecResolution 1=800x480 2=1280x720 3=1920x1080
-                                                                                //  c:0/1 for 30/60 fps   d:widthMargin e:heightMargin f:density/fps g: ?
-  private boolean f                 = false;                            // f
-
-*/
-// D/CAR.GAL ( 3804): Service id=1 type=MediaSinkService { codec type=1 { codecResolution=1 widthMargin=0 heightMargin=0 density=30}}
-
-            // CH 1 Sensors:                      //cq/co[]
-//*
-                        0x0A, 4 + 4*2,//co: int, cm/cn[]
-                                      0x08, AA_CH_SEN,
-                                      0x12, 4*2,
-                                                          0x0A, 2,
-                                                                    0x08, 11, // SENSOR_TYPE_DRIVING_STATUS 12
-                                                          0x0A, 2,
-                                                                    0x08, 10, // SENSOR_TYPE_NIGHT_DATA 10
-//*/
-/*  Requested Sensors: 10, 9, 2, 7, 6:
-                        0x0A, 4 + 4*6,     //co: int, cm/cn[]
-                                      0x08, AA_CH_SEN,  0x12, 4*6,
-                                                          0x0A, 2,
-                                                                    0x08, 11, // SENSOR_TYPE_DRIVING_STATUS 12
-                                                          0x0A, 2,
-                                                                    0x08,  3, // SENSOR_TYPE_RPM            2
-                                                          0x0A, 2,
-                                                                    0x08,  8, // SENSOR_TYPE_DIAGNOSTICS    7
-                                                          0x0A, 2,
-                                                                    0x08,  7, // SENSOR_TYPE_GEAR           6
-                                                          0x0A, 2,
-                                                                    0x08,  1, // SENSOR_TYPE_COMPASS       10
-                                                          0x0A, 2,
-                                                                    0x08, 10, // SENSOR_TYPE_LOCATION       9
-//*/
-//*
-            // CH 2 Video Sink:
-                        0x0A, 4+4+11, 0x08, AA_CH_VID,
-//800f
-                                      0x1A, 4+11, // Sink: Video
-                                                  0x08, 3,    // int (codec type) 3 = Video
-                                                  //0x10, 1,    // int (audio stream type)
-//                                                  0x1a, 8,    // f        //I44100 = 0xAC44 = 10    10 1  100 0   100 0100  :  -60, -40, 2
-                                                                            // 48000 = 0xBB80 = 10    111 0111   000 0000     :  -128, -9, 2
-                                                                            // 16000 = 0x3E80 = 11 1110 1   000 0000          :  -128, -3
-
-                                                  0x22, 11,   // cz                                                               // Res        FPS, WidMar, HeiMar, DPI
-                                                              // DPIs:    (FPS doesn't matter ?)
-                                                              0x08, 1, 0x10, 1, 0x18, 0, 0x20, 0, 0x28,  -96, 1,   //0x30, 0,     //  800x 480, 30 fps, 0, 0, 160 dpi    0xa0 // Default 160 like 4100NEX
-                                                            //0x08, 1, 0x10, 1, 0x18, 0, 0x20, 0, 0x28, -128, 1,   //0x30, 0,     //  800x 480, 30 fps, 0, 0, 128 dpi    0x80 // 160-> 128 Small, phone/music close to outside
-                                                            //0x08, 1, 0x10, 1, 0x18, 0, 0x20, 0, 0x28,  -16, 1,   //0x30, 0,     //  800x 480, 30 fps, 0, 0, 240 dpi    0xf0 // 160-> 240 Big, phone/music close to center
-
-                                                            // 60 FPS makes little difference:
-                                                            //0x08, 1, 0x10, 2, 0x18, 0, 0x20, 0, 0x28,  -96, 1,   //0x30, 0,     //  800x 480, 60 fps, 0, 0, 160 dpi    0xa0
-
-                                                            // Higher resolutions don't seem to work as of June 10, 2015 release of AA:
-                                                            //0x08, 2, 0x10, 1, 0x18, 0, 0x20, 0, 0x28,  -96, 1,   //0x30, 0,     // 1280x 720, 30 fps, 0, 0, 160 dpi    0xa0
-                                                            //0x08, 3, 0x10, 1, 0x18, 0, 0x20, 0, 0x28,  -96, 1,   //0x30, 0,     // 1920x1080, 30 fps, 0, 0, 160 dpi    0xa0
-//*/
-//* Crashes on null Point reference without:
-            // CH 3 TouchScreen/Input:
-//                        0x0A, 0x12,
-//                                        0x08, AA_CH_TOU,
-//										0x22,0x0E,
-//											0x0A,0x0C,0x01,0x02,0x04,0x13,0x14,0x15,0x16,0x17,0x54,-128,-128,0x04,
-                        0x0A, 4+2+6,
-                                        0x08, AA_CH_TOU,
-                                        0x22, 2+6,
-                                                  0x12,  6,
-                                                              0x08, -96,   6,    0x10, -32, 3,
-//*/
-//*
-            // CH 7 Microphone Audio Source:
-                        0x0A, 4+4+7,   0x08, AA_CH_MIC,
-                                       0x2A, 4+7,   // Source: Microphone Audio
-                                                  0x08, 1,    // int (codec type) 1 = Audio
-                                                  0x12, 7,    // AudCfg   16000hz         16bits        1chan
-                                                              //0x08, 0x80, 0x7d,         0x10, 0x10,   0x18, 1,
-                                                                0x08, -128, 0x7d,         0x10, 0x10,   0x18, 1,
-//*/
-/*
-                        0x0A, 4+4+7+1, 0x08, AA_CH_MIC,
-                                       0x2A, 4+7+1, // Source: Microphone Audio
-                                                  0x08, 1,    // int (codec type) 1 = Audio
-                                                  0x12, 8,    // AudCfg   48000hz         16bits        2chan
-                                                                //0x08, 0x80, 0xF7, 0x02,   0x10, 0x10,   0x18, 02,
-                                                                0x08, -128,   -9, 0x02,   0x10, 0x10,   0x18, 02,
-//*/
-/*
-                // MediaPlaybackService:
-                        0x0A, 4,     0x08, 6,
-                                     0x4a, 0,
-//*/
-//*
-                        0x12, 13, 'M', 'a', 'z', 'd', 'a', ' ', 'C', 'o', 'n', 'n', 'e', 'c', 't', //1, 'A', // Car Manuf          Part of "remembered car"
-                        0x1A, 6, 'M', 'a', 'z', 'd', 'a', '6', //1, 'B', // Car Model
-                        0x22, 4, '2', '0', '1', '6',//1, 'C', // Car Year           Part of "remembered car"
-                        0x2A, 4, '0', '0', '0', '1',//1, 'D', // Car Serial     Not Part of "remembered car" ??     (vehicleId=null)
-                        0x30, 1,//0,      // driverPosition
-                        0x3A, 5, 'M', 'a', 'z', 'd', 'a', //1, 'E', // HU  Make / Manuf
-                        0x42, 7, 'C', 'o', 'n', 'n', 'e', 'c', 't', //1, 'F', // HU  Model
-                        0x4A, 4, 'S', 'W', 'B', '1',//1, 'G', // HU  SoftwareBuild
-                        0x52, 4, 'S', 'W', 'V', '1',//1, 'H', // HU  SoftwareVersion
-                        0x58, 0,//1,//1,//0,//1,       // ? bool (or int )    canPlayNativeMediaDuringVr
-                        0x60, 0,//1,//0,//0,//1        // mHideProjectedClock     1 = True = Hide
-                        //0x68, 1,
-//*/
-
-// 04-22 03:43:38.049 D/CAR.SERVICE( 4306): onCarInfo com.google.android.gms.car.CarInfoInternal[dbId=0,manufacturer=A,model=B,headUnitProtocolVersion=1.1,modelYear=C,vehicleId=null,
-// bluetoothAllowed=false,hideProjectedClock=false,driverPosition=0,headUnitMake=E,headUnitModel=F,headUnitSoftwareBuild=G,headUnitSoftwareVersion=H,canPlayNativeMediaDuringVr=false]
-
-
-//*
-            // CH 4 Output Audio Sink:
-                        0x0A, 4+6+8, 0x08, AA_CH_AUD,
-                                     0x1A, 6+8, // Sink: Output Audio
-                                                  0x08, 1,    // int (codec type) 1 = Audio
-                                                  0x10, 3,    // Audio Stream Type = 3 = MEDIA
-                                                  0x1A, 8,    // AudCfg   48000hz         16bits        2chan
-                                                              //0x08, 0x80, 0xF7, 0x02,   0x10, 0x10,   0x18, 02,
-                                                                0x08, -128,   -9, 0x02,   0x10, 0x10,   0x18, 02,
-//*/
-//*
-            // CH 5 Output Audio Sink1:
-                        0x0A, 4+6+7, 0x08, AA_CH_AU1,
-                                     0x1A, 6+7, // Sink: Output Audio
-                                                  0x08, 1,    // int (codec type) 1 = Audio
-                                                  0x10, 1,    // Audio Stream Type = 1 = TTS
-                                                  0x1A, 7,    // AudCfg   16000hz         16bits        1chan
-                                                              //0x08, 0x80, 0x7d,         0x10, 0x10,   0x18, 1,
-                                                                0x08, -128, 0x7d,         0x10, 0x10,   0x18, 1,
-//*/
-////*
-            // CH 6 Output Audio Sink2:
-                        0x0A, 4+6+7, 0x08, AA_CH_AU2,
-                                     0x1A, 6+7, // Sink: Output Audio
-                                                  0x08, 1,    // int (codec type) 1 = Audio
-                                                  0x10, 2,    // Audio Stream Type = 2 = SYSTEM
-                                                  0x1A, 7,    // AudCfg   16000hz         16bits        1chan
-                                                              //0x08, 0x80, 0x7d,         0x10, 0x10,   0x18, 1,
-                                                                0x08, -128, 0x7d,         0x10, 0x10,   0x18, 1,
-//*/
-
-    };
+};
 
 #define sd_buf_aud_len  2+4+6+8+2+4+6+7+2+4+6+7   // 58
 
@@ -421,12 +286,9 @@ public final class MsgMediaSinkService extends k                        // bd/Ms
       logd ("Service Discovery Request");                               // S 0 CTR b src: HU  lft:   113  msg_type:     6 Service Discovery Response    S 0 CTR b 00000000 0a 08 08 01 12 04 0a 02 08 0b 0a 13 08 02 1a 0f
 
     int sd_buf_len = sizeof (sd_buf);
-//    if (wifi_direct && (file_get ("/data/data/ca.yyx.hu/files/nfc_wifi") || file_get ("/sdcard/hu_disable_audio_out")))    // If self or disable file exists...
-    if (file_get ("/tmp/mnt/sdnav/hu_disable_audio_out"))    			// If self or disable file exists...
-      sd_buf_len -= sd_buf_aud_len;                                     // Remove audio outputs from service discovery response buf
-
     return (hu_aap_enc_send (0,chan, sd_buf, sd_buf_len));                // Send Service Discovery Response from sd_buf
   }
+
   int aa_pro_ctr_a06 (int chan, byte * buf, int len) {                  // Service Discovery Response
     loge ("!!!!!!!!");
     return (-1);
@@ -846,6 +708,15 @@ public final class MsgMediaSinkService extends k                        // bd/Ms
     NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
     NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
 
+
+// Channel 3 Tou TouchScreen:
+    NULL, NULL, NULL, NULL, NULL, NULL, NULL, aa_pro_all_a07, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+    NULL, NULL, aa_pro_tou_b02, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+
 // Channel 1 Sen Sensor:
     NULL, NULL, NULL, NULL, NULL, NULL, NULL, aa_pro_all_a07, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
     NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
@@ -858,14 +729,6 @@ public final class MsgMediaSinkService extends k                        // bd/Ms
     NULL, NULL, NULL, NULL, NULL, NULL, NULL, aa_pro_all_a07, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
     NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
     aa_pro_snk_b00, aa_pro_vid_b01, NULL, NULL, NULL, NULL, NULL, aa_pro_vid_b07, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-
-// Channel 3 Tou TouchScreen:
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL, aa_pro_all_a07, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, aa_pro_tou_b02, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
     NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
     NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
     NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
