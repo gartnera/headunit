@@ -655,16 +655,7 @@
 
 
   void iaap_video_decode (byte * buf, int len) {
-
-    byte * q_buf = (byte*)vid_write_tail_buf_get (len);                         // Get queue buffer tail to write to     !!! Need to lock until buffer written to !!!!
-    if (ena_log_verbo)
-      logd ("video q_buf: %p  buf: %p  len: %d", q_buf, buf, len);
-    if (q_buf == NULL) {
-      loge ("Error video no q_buf: %p  buf: %p  len: %d", q_buf, buf, len);
-      //return;                                                         // Continue in order to write to record file
-    }
-    else
-      memcpy (q_buf, buf, len);                                         // Copy video to queue buffer
+    hu_write_to_buffer(AA_CH_VID, buf, len);
   }
 
 /* 8,192 bytes per packet at stereo 48K 16 bit = 42.667 ms per packet                            Timestamp = uptime in microseconds:
@@ -680,26 +671,13 @@ ms: 337, 314                                                                    
   int aud_rec_fd  = -1;
 
   void iaap_audio_decode (int chan, byte * buf, int len) {
-//*
-
-    //hu_uti.c:  #define aud_buf_BUFS_SIZE    65536 * 4      // Up to 256 Kbytes
-#define aud_buf_BUFS_SIZE    65536 * 4      // Up to 256 Kbytes
+    #define aud_buf_BUFS_SIZE    65536 * 4      // Up to 256 Kbytes
     if (len > aud_buf_BUFS_SIZE) {
       loge ("Error audio len: %d  aud_buf_BUFS_SIZE: %d", len, aud_buf_BUFS_SIZE);
       len = aud_buf_BUFS_SIZE;
     }
 
-
-    byte * q_buf = (byte*)aud_write_tail_buf_get (len);                         // Get queue buffer tail to write to     !!! Need to lock until buffer written to !!!!
-    if (ena_log_verbo)
-      logd ("audio q_buf: %p  buf: %p  len: %d", q_buf, buf, len);
-    if (q_buf == NULL) {
-      loge ("Error audio no q_buf: %p  buf: %p  len: %d", q_buf, buf, len);
-      //return;                                                         // Continue in order to write to record file
-    }
-    else {
-      memcpy (q_buf, buf, len);                                         // Copy audio to queue buffer
-    }
+    hu_write_to_buffer(chan, buf, len);
   }
 
 

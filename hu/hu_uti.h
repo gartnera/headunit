@@ -97,15 +97,9 @@
   unsigned long ms_get          ();
   unsigned long ms_sleep        (unsigned long ms);
   void hex_dump                 (const char * prefix, int width, unsigned char * buf, int len);
-  char * vid_write_tail_buf_get  (int len);
-  char * vid_read_head_buf_get   (int * len);
-  char * aud_write_tail_buf_get  (int len);
-  char * aud_read_head_buf_get   (int * len);
 
-  extern int vid_buf_buf_tail;    // Tail is next index for writer to write to.   If head = tail, there is no info.
-  extern int vid_buf_buf_head;    // Head is next index for reader to read from.
-  extern int aud_buf_buf_tail;    // Tail is next index for writer to write to.   If head = tail, there is no info.
-  extern int aud_buf_buf_head;    // Head is next index for reader to read from.
+int hu_read_from_buffer(int channel, uint8_t* data, size_t max_len);
+void hu_write_to_buffer(int channel, uint8_t* data, size_t len);
 
   #ifndef __ANDROID_API__
     #define strlcpy   strncpy

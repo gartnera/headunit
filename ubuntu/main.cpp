@@ -56,7 +56,7 @@ struct cmd_arg_struct {
 
 static gboolean read_data(gst_app_t *app)
 {
-    GstBuffer *buffer;
+    GstBuffer *g_buffer;
     guint8 *ptr;
     GstFlowReturn ret;
     int iret;
@@ -76,31 +76,37 @@ static gboolean read_data(gst_app_t *app)
     }
 
     /* Is there a video buffer queued? */
-    vbuf = (guint8*)vid_read_head_buf_get (&res_len);
-    if (vbuf != NULL) {
-        
-        buffer = gst_buffer_new();
-        gst_buffer_set_data(buffer, vbuf, res_len);
-        ret = gst_app_src_push_buffer((GstAppSrc *)app->src, buffer);
-
+    uint8_t buffer[256000];
+    int read;
+    while((read = hu_read_from_buffer(AA_CH_VID, buffer, sizeof(buffer))) > 0) {
+        printf("[VID][Read %d]\n", read);
+        g_buffer = gst_buffer_new();
+        gst_buffer_set_data(g_buffer, buffer, read);
+        ret = gst_app_src_push_buffer((GstAppSrc *)app->src, g_buffer);
         if(ret !=  GST_FLOW_OK){
             printf("push buffer returned %d for %d bytes \n", ret, res_len);
             return FALSE;
         }
     }
 
-    /* Is there an audio buffer queued? */
-    abuf = (guint8*)aud_read_head_buf_get (&res_len);
-    if (abuf != NULL) {
-        
-        buffer = gst_buffer_new();
-        gst_buffer_set_data(buffer, abuf, res_len);
-        
-        if (res_len <= 2048 + 96)
-            ret = gst_app_src_push_buffer((GstAppSrc *)au1_src, buffer);
-        else
-            ret = gst_app_src_push_buffer((GstAppSrc *)aud_src, buffer);
+    /* Is there a primary audio buffer queued? */
+    while ((read = hu_read_from_buffer(AA_CH_AUD, buffer, sizeof(buffer))) > 0) {
+        printf("[AUD][Read %d]\n", read);
+        g_buffer = gst_buffer_new();
+        gst_buffer_set_data(g_buffer, buffer, read);
+        ret = gst_app_src_push_buffer((GstAppSrc *)aud_src, g_buffer);
+        if(ret !=  GST_FLOW_OK){
+            printf("push buffer returned %d for %d bytes \n", ret, res_len);
+            return FALSE;
+        }
+    }
 
+    /* Is there a notification buffer queued? */
+    while ((read = hu_read_from_buffer(AA_CH_AU1, buffer, sizeof(buffer))) > 0) {
+        printf("[AU1][Read %d]\n", read);
+        g_buffer = gst_buffer_new();
+        gst_buffer_set_data(g_buffer, buffer, read);
+        ret = gst_app_src_push_buffer((GstAppSrc *)au1_src, g_buffer);
         if(ret !=  GST_FLOW_OK){
             printf("push buffer returned %d for %d bytes \n", ret, res_len);
             return FALSE;

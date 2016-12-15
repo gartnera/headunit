@@ -1,3 +1,5 @@
+#pragma once
+
 #include "hu_uti.h"
 #include "hu.pb.h"
 

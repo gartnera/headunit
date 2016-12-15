@@ -83,12 +83,10 @@ static void read_mic_data (GstElement * sink);
 
 static gboolean read_data(gst_app_t *app)
 {
-	GstBuffer *buffer;
+	GstBuffer *g_buffer;
 	guint8 *ptr;
 	GstFlowReturn ret;
 	int iret;
-	char *vbuf;
-	char *abuf;
 	int res_len = 0;
 
 	iret = hu_aap_recv_process ();                       
@@ -99,44 +97,40 @@ static gboolean read_data(gst_app_t *app)
 		return FALSE;
 	}
 
-	/* Is there a video buffer queued? */
-	vbuf = vid_read_head_buf_get (&res_len);
+    /* Is there a video buffer queued? */
+    uint8_t buffer[256000];
+    int read;
+    while((read = hu_read_from_buffer(AA_CH_VID, buffer, sizeof(buffer))) > 0) {
+        g_buffer = gst_buffer_new();
+        gst_buffer_set_data(g_buffer, buffer, read);
+        ret = gst_app_src_push_buffer((GstAppSrc *)app->src, g_buffer);
+        if(ret !=  GST_FLOW_OK){
+            printf("push buffer returned %d for %d bytes \n", ret, res_len);
+            return FALSE;
+        }
+    }
 
-	if (vbuf != NULL) {
+    /* Is there a primary audio buffer queued? */
+    while ((read = hu_read_from_buffer(AA_CH_AUD, buffer, sizeof(buffer))) > 0) {
+        g_buffer = gst_buffer_new();
+        gst_buffer_set_data(g_buffer, buffer, read);
+        ret = gst_app_src_push_buffer((GstAppSrc *)aud_src, g_buffer);
+        if(ret !=  GST_FLOW_OK){
+            printf("push buffer returned %d for %d bytes \n", ret, res_len);
+            return FALSE;
+        }
+    }
 
-		//buffer = gst_buffer_new();
-		//gst_buffer_set_data(buffer, vbuf, res_len);
-		buffer = gst_buffer_new_and_alloc(res_len);
-		memcpy(GST_BUFFER_DATA(buffer),vbuf,res_len);
-
-		ret = gst_app_src_push_buffer(app->src, buffer);
-
-		if(ret !=  GST_FLOW_OK){
-			printf("push buffer returned %d for %d bytes \n", ret, res_len);
-			return FALSE;
-		}
-	}
-	
-	/* Is there an audio buffer queued? */
-	abuf = aud_read_head_buf_get (&res_len);
-	if (abuf != NULL) {
-
-		//buffer = gst_buffer_new();
-		//gst_buffer_set_data(buffer, abuf, res_len);
-		
-		buffer = gst_buffer_new_and_alloc(res_len);
-		memcpy(GST_BUFFER_DATA(buffer),abuf,res_len);
-
-		if (res_len <= 2048 + 96)
-			ret = gst_app_src_push_buffer((GstAppSrc *)au1_src, buffer);
-		else
-			ret = gst_app_src_push_buffer((GstAppSrc *)aud_src, buffer);
-
-		if(ret !=  GST_FLOW_OK){
-			printf("push buffer returned %d for %d bytes \n", ret, res_len);
-			return FALSE;
-		}
-	}	
+    /* Is there a notification buffer queued? */
+    while ((read = hu_read_from_buffer(AA_CH_AU1, buffer, sizeof(buffer))) > 0) {
+        g_buffer = gst_buffer_new();
+        gst_buffer_set_data(g_buffer, buffer, read);
+        ret = gst_app_src_push_buffer((GstAppSrc *)au1_src, g_buffer);
+        if(ret !=  GST_FLOW_OK){
+            printf("push buffer returned %d for %d bytes \n", ret, res_len);
+            return FALSE;
+        }
+    }
 
 	return TRUE;
 }
