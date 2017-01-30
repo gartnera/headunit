@@ -16,6 +16,7 @@
 
 #include "hu_uti.h"
 #include "hu_aap.h"
+#include "bt/ub_bluetooth.h"
 
 typedef struct {
         GMainLoop *loop;
@@ -550,6 +551,11 @@ public:
                 }
 #endif
         }
+
+        virtual void
+        CustomizeBluetoothService(int chan, HU::ChannelDescriptor::BluetoothService& bluetoothService) {
+                bluetoothService.set_car_address(get_bluetooth_mac_address());
+        }
 };
 
 int
@@ -573,6 +579,10 @@ main(int argc, char *argv[]) {
         printf("Using hard coded scalefactor\n");
         g_dpi_scalefactor = 1;
 #endif
+
+        std::string bt_mac = get_bluetooth_mac_address();
+        printf("Bluetooth MAC: %s\n", bt_mac.c_str());
+
         gst_app_t *app = &gst_app;
         int ret = 0;
         errno = 0;

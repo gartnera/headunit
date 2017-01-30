@@ -13,6 +13,7 @@ SRCS += $(TOP)/hu/hu_usb.cpp
 SRCS += $(TOP)/hu/hu_uti.cpp
 SRCS += $(TOP)/hu/hu_tcp.cpp
 SRCS += $(TOP)/hu/generated.x64/hu.pb.cc
+SRCS += bt/ub_bluetooth.cpp
 SRCS += main.cpp
 
 OBJS = $(addsuffix .x64.o, $(basename $(SRCS)))

@@ -538,8 +538,18 @@
 
     callbacks.CustomizeCarInfo(carInfo);
 
+    HU::ChannelDescriptor* btChannel = carInfo.add_channels();
+    btChannel->set_channel_id(AA_CH_BT);
+    {
+      auto inner = btChannel->mutable_bluetooth_service();
+      callbacks.CustomizeBluetoothService(AA_CH_BT, *inner);
+      inner->add_supported_pairing_methods(HU::ChannelDescriptor_BluetoothService::BLUETOOTH_PARING_METHOD_A2DP);
+      inner->add_supported_pairing_methods(HU::ChannelDescriptor_BluetoothService::BLUETOOTH_PARING_METHOD_HFP);
+    }
+
     return hu_aap_enc_send_message(0, chan, HU_PROTOCOL_MESSAGE::ServiceDiscoveryResponse, carInfo);
   }
+
 
   
   int HUServer::hu_handle_PingRequest (int chan, byte * buf, int len) {                  // Ping Request

@@ -30,6 +30,7 @@ using json = nlohmann::json;
 
 #include "nm/mzd_nightmode.h"
 #include "gps/mzd_gps.h"
+#include "bt/mzd_bluetooth.h"
 
 #define EVENT_DEVICE_TS	"/dev/input/filtered-touchscreen0"
 #define EVENT_DEVICE_KBD "/dev/input/filtered-keyboard0"
@@ -738,6 +739,10 @@ public:
             videoConfig->set_margin_height(30);
         }
     #endif
+  }
+
+  virtual void CustomizeBluetoothService(int chan, HU::ChannelDescriptor::BluetoothService& bluetoothService) {
+    bluetoothService.set_car_address(get_bluetooth_mac_address());
   }
 };
 

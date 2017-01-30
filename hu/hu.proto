@@ -251,9 +251,9 @@ message ChannelDescriptor
         enum BluetoothPairingMethod
         {
             BLUETOOTH_PARING_METHOD_1 = 1;
-            BLUETOOTH_PARING_METHOD_2 = 2;
+            BLUETOOTH_PARING_METHOD_A2DP = 2;
             BLUETOOTH_PARING_METHOD_3 = 3;
-            BLUETOOTH_PARING_METHOD_4 = 4;
+            BLUETOOTH_PARING_METHOD_HFP = 4;
         }
         required string car_address = 1;
         repeated BluetoothPairingMethod supported_pairing_methods = 2;
