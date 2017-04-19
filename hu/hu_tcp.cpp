@@ -86,7 +86,7 @@
     if (tcp_so_fd < 0)
       return (-1);
 
-    memset ((char *) & cli_addr, sizeof (cli_addr), 0);                 // ?? Don't need this ?
+    memset ((char *) & cli_addr, 0, sizeof (cli_addr));                 // ?? Don't need this ?
     //cli_addr.sun_family = CS_FAM;                                     // ""
     cli_len = sizeof (cli_addr);
 
@@ -138,7 +138,7 @@
       logd ("setsockopt TCP_NODELAY Success");
 
     if (wifi_direct) {
-        memset ((char *) & srv_addr, sizeof (srv_addr), 0);
+        memset ((char *) & srv_addr, 0, sizeof (srv_addr));
 
         srv_addr.sin_family = AF_INET;
         srv_addr.sin_addr.s_addr = htonl (INADDR_ANY);                      // Will bind to any/all Interfaces/IPs
