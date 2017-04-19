@@ -94,13 +94,18 @@ int hu_log (int prio, const char * tag, const char * func, const char * fmt, ...
   snprintf (tag_str, sizeof (tag_str), "%32.32s", func);
   __android_log_vprint (prio, tag_str, fmt, ap);
 #else
-  char log_line [4096] = {0};
   va_list aq;
-  va_start (aq, fmt); 
+  va_start (aq, fmt);
+
+  char log_line [4096] = {0};
   int len = vsnprintf (log_line, sizeof (log_line), fmt, aq);
+
   //Time doesn't work on CMU anyway, always says 1970
   printf ("%s: %s: %s : %s\n", prio_get (prio), tag, func, log_line);
+
+  va_end(aq);
 #endif
+  va_end(ap);
 
   // if (prio == hu_LOG_ERR)
   // {
@@ -139,15 +144,15 @@ void hex_dump (const char * prefix, int width, unsigned char * buf, int len) {
 
   if (prefix)
     //strlcpy (line, prefix, sizeof (line));
-    strlcat (line, prefix, sizeof (line));
+    strlcat (line, prefix, sizeof(line));
 
   snprintf (tmp, sizeof (tmp), " %8.8x ", 0);
-  strlcat (line, tmp, sizeof (line));
+  strlcat (line, tmp, sizeof(line) - strlen(line));
 
   for (i = 0, n = 1; i < len; i ++, n ++) {                           // i keeps incrementing, n gets reset to 0 each line
 
     snprintf (tmp, sizeof (tmp), "%2.2x ", buf [i]);
-    strlcat (line, tmp, sizeof (line));                               // Append 2 bytes hex and space to line
+    strlcat (line, tmp, sizeof(line) - strlen(line));                 // Append 2 bytes hex and space to line
 
     if (n == width) {                                                 // If at specified line width
       n = 0;                                                          // Reset position in line counter
@@ -156,11 +161,11 @@ void hex_dump (const char * prefix, int width, unsigned char * buf, int len) {
       line [0] = 0;
       if (prefix)
         //strlcpy (line, prefix, sizeof (line));
-        strlcat (line, prefix, sizeof (line));
+        strlcat (line, prefix, sizeof(line) - strlen(line));
 
       //snprintf (tmp, sizeof (tmp), " %8.8x ", i + 1);
       snprintf (tmp, sizeof (tmp), "     %4.4x ", i + 1);
-      strlcat (line, tmp, sizeof (line));
+      strlcat (line, tmp, sizeof(line) - strlen(line));
     }
     else if (i == len - 1)                                            // Else if at last byte
       logd (line);                                                    // Log line

@@ -191,7 +191,7 @@ Channel specified for each service:
       //snprintf (str_buf, sizeof (str_buf), "%1.1d", num);
       int ctr = 0;
       for (ctr = 0; ctr < n - 1; ctr ++)
-        strncat (str_buf, "                    ", sizeof (str_buf));
+        strncat (str_buf, "                    ", sizeof(str_buf) - strlen(str_buf) - 1);
 
 
       //unsigned char str_buf2 [256] = {0};
@@ -237,10 +237,10 @@ Channel specified for each service:
       char str_buf [256] = {0};
       int ctr = 0;
       for (ctr = 0; ctr < n - 1; ctr ++)
-        strncat (str_buf, "                    ", sizeof (str_buf));
+        strncat (str_buf, "                    ", sizeof(str_buf) - strlen(str_buf) - 1);
 
       char str_buf2 [256] = {0};
-      snprintf (str_buf2, sizeof (str_buf), "%s%1.1d", str_buf, num);   // Dump raw array
+      snprintf (str_buf2, sizeof (str_buf), "%s%1.1u", str_buf, num);   // Dump raw array
       hex_dump (str_buf2, 16, buf, alen);
     }
 
