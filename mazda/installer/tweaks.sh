@@ -145,6 +145,26 @@ modify_cmu_files()
             log_message "backup exists so leaving file as is - there will be no autostart. FAILED\n"
         fi
     fi
+	
+	# copy patched asound.conf to solve Bluetooth calling bug
+	SOUND_X=$(grep -c "tel_asymed" /etc/asound.conf)
+	if [ $SOUND_X -eq 2 ]; then
+		log_message "Copy patched asound.conf to fix Bluetooth call bug ... "
+		# first backup
+		if [ ! -e /etc/asound.conf.org ]; then
+			if cp -a /etc/asound.conf /etc/asound.conf.org; then
+				log_message "asound.conf backed up /etc/asound.conf.org ... "
+			else
+				log_message "backup of asound.conf FAILED ... "
+			fi
+		fi
+		if cp -a ${MYDIR}/config/androidauto/etc/asound.conf /etc; then
+			log_message "copied patched asound.conf\n"
+		else
+			log_message "copy patched asound.conf FAILED\n"
+		fi
+		chmod 755 /etc/asound.conf
+	fi
 }
 
 revert_cmu_files()
@@ -201,6 +221,14 @@ revert_cmu_files()
             else
                 log_message "FAILED\n"
             fi
+        fi
+    fi
+    if [ -e /etc/asound.conf.org ]; then
+        log_message "Reverting asound.conf ... "
+        if mv /etc/asound.conf.org /etc/asound.conf; then
+            log_message "OK\n"
+        else
+            log_message "FAILED\n"
         fi
     fi
 }
