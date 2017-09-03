@@ -146,7 +146,7 @@ modify_cmu_files()
         fi
     fi
 	
-	# copy patched asound.conf to solve Bluetooth calling bug
+	# patch asound.conf to solve Bluetooth calling bug
 	SOUND_X=$(grep -c "tel_asymed" /etc/asound.conf)
 	if [ $SOUND_X -eq 2 ]; then
 		log_message "Copy patched asound.conf to fix Bluetooth call bug ... "
@@ -158,12 +158,8 @@ modify_cmu_files()
 				log_message "backup of asound.conf FAILED ... "
 			fi
 		fi
-		if cp -a ${MYDIR}/config/androidauto/etc/asound.conf /etc; then
-			log_message "copied patched asound.conf\n"
-		else
-			log_message "copy patched asound.conf FAILED\n"
-		fi
-		chmod 755 /etc/asound.conf
+		sed -i 's/slave.pcm "tel_asymed"/slave.pcm "asymed"/g' /etc/asound.conf
+		log_message "changes made to /etc/asound.conf\n"
 	fi
 }
 
