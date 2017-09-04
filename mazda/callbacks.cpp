@@ -304,12 +304,16 @@ void AudioManagerClient::populateStreamTable()
                 continue;
             }
 
-            printf("Found stream %s session id %i\n", streamName.c_str(), sessionId);
+            printf("Found %s stream %s session id %i\n", streamType.c_str(), streamName.c_str(), sessionId);
             streamToSessionIds[streamName] = sessionId;
 
             if (streamName == "USB")
             {
                 usbSessionID = sessionId;
+            }
+            if (streamName == "BTHF")
+            {
+                BTHFSessionID = sessionId;
             }
         }
     }
@@ -327,7 +331,7 @@ void AudioManagerClient::populateStreamTable()
 
 AudioManagerClient::AudioManagerClient(MazdaEventCallbacks& callbacks, DBus::Connection &connection)
     : DBus::ObjectProxy(connection, "/com/xse/service/AudioManagement/AudioApplication", "com.xsembedded.service.AudioManagement")
-    , callbacks(callbacks)
+    ,bthfMgr(connection), callbacks(callbacks)
 {
     populateStreamTable();
     if (usbSessionID < 0)
@@ -400,6 +404,7 @@ void AudioManagerClient::Notify(const std::string &signalName, const std::string
         {
             auto result = json::parse(payload);
             std::string streamName = result["streamName"].get<std::string>();
+            std::string streamType = result["streamType"].get<std::string>();
             std::string newFocus = result["newFocus"].get<std::string>();
 
             auto findIt = streamToSessionIds.find(streamName);

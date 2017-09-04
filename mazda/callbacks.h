@@ -15,6 +15,7 @@ class VideoOutput;
 class AudioOutput;
 class MazdaEventCallbacks;
 class VideoManagerClient;
+class AudioManagerClient;
 
 class NativeGUICtrlClient : public com::jci::nativeguictrl_proxy,
                             public DBus::ObjectProxy
@@ -57,6 +58,30 @@ public:
         SetRequiredSurfaces(idString.str(), fadeOpera ? 1 : 0);
     }
 };
+class BTHFManagerClient : public com::jci::bthf_proxy,
+                          public DBus::ObjectProxy
+{
+public:
+  BTHFManagerClient(DBus::Connection &connection)
+          : DBus::ObjectProxy(connection, "/com/jci/bthf", "com.jci.bthf")
+  {
+  }
+  virtual void BatteryIndicator(const uint32_t& minValue, const uint32_t& maxValue, const uint32_t& currentValue) override {}
+  virtual void SignalStrength(const uint32_t& minValue, const uint32_t& maxValue, const uint32_t& currentValue) override {}
+  virtual void CallStatus(const uint32_t& bthfstate, const uint32_t& call1status, const uint32_t& call2status, const ::DBus::Struct< std::vector< uint8_t > >& call1Number, const ::DBus::Struct< std::vector< uint8_t > >& call2Number) override {}
+  virtual void RoamIndicator(const uint32_t& value) override {}
+  virtual void NewServiceIndicator(const bool& value) override {}
+  virtual void PhoneChargeIndicator(const uint32_t& value) override {}
+  virtual void SmsPresentIndicator(const bool& value) override {}
+  virtual void VoiceMailIndicator(const bool& value) override {}
+  virtual void LowBatteryIndicator(const bool& value) override {}
+  virtual void BthfReadyStatus(const uint32_t& hftReady, const uint32_t& reasonCode) override {}
+  virtual void BthfBusyReason(const uint32_t& busyReason) override {}
+  virtual void MicStatus(const bool& isMicMuted) override {}
+  virtual void BargeinStatus(const bool& isBargeinActive) override {}
+  virtual void BthfSettingsResponse(const ::DBus::Struct< std::vector< uint8_t > >& callsettings) override {}
+  virtual void FailureReasonCodes(const uint32_t& errorType) override {}
+};
 
 class AudioManagerClient : public com::xsembedded::ServiceProvider_proxy,
                      public DBus::ObjectProxy
@@ -65,13 +90,15 @@ class AudioManagerClient : public com::xsembedded::ServiceProvider_proxy,
     //"USB" as far as the audio manager cares is the normal ALSA sound output
     int usbSessionID = -1;
     int previousSessionID = -1;
+    int BTHFSessionID = -1;
     bool waitingForFocusLostEvent = false;
-    MazdaEventCallbacks& callbacks;
     std::set<int> channelsWaitingForFocus;
     std::set<int> channelsWithFocus;
 
     //These IDs are usually the same, but they depend on the startup order of the services on the car so we can't assume them 100% reliably
     void populateStreamTable();
+    MazdaEventCallbacks& callbacks;
+    BTHFManagerClient bthfMgr;
 public:
     AudioManagerClient(MazdaEventCallbacks& callbacks, DBus::Connection &connection);
     ~AudioManagerClient();

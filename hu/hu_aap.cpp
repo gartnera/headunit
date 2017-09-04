@@ -35,6 +35,7 @@
       case AA_CH_AUD: return ("AUD");
       case AA_CH_AU1: return ("AU1");
       case AA_CH_AU2: return ("AU2");
+      case AA_CH_BT: return ("BT");
     }
     return ("UNK");
   }
