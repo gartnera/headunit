@@ -145,6 +145,22 @@ modify_cmu_files()
             log_message "backup exists so leaving file as is - there will be no autostart. FAILED\n"
         fi
     fi
+	
+	# patch asound.conf to solve Bluetooth calling bug
+	SOUND_X=$(grep -c "tel_asymed" /etc/asound.conf)
+	if [ $SOUND_X -eq 2 ]; then
+		log_message "Copy patched asound.conf to fix Bluetooth call bug ... "
+		# first backup
+		if [ ! -e /etc/asound.conf.org ]; then
+			if cp -a /etc/asound.conf /etc/asound.conf.org; then
+				log_message "asound.conf backed up /etc/asound.conf.org ... "
+			else
+				log_message "backup of asound.conf FAILED ... "
+			fi
+		fi
+		sed -i 's/slave.pcm "tel_asymed"/slave.pcm "asymed"/g' /etc/asound.conf
+		log_message "changes made to /etc/asound.conf\n"
+	fi
 }
 
 revert_cmu_files()
@@ -201,6 +217,14 @@ revert_cmu_files()
             else
                 log_message "FAILED\n"
             fi
+        fi
+    fi
+    if [ -e /etc/asound.conf.org ]; then
+        log_message "Reverting asound.conf ... "
+        if mv /etc/asound.conf.org /etc/asound.conf; then
+            log_message "OK\n"
+        else
+            log_message "FAILED\n"
         fi
     fi
 }
