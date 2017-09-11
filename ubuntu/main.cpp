@@ -70,7 +70,11 @@ main(int argc, char *argv[]) {
         gst_init(NULL, NULL);
         struct sigaction action;
         sigaction(SIGINT, NULL, &action);
-        SDL_Init(SDL_INIT_EVERYTHING);
+        if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
+            SDL_Log("Unable to initialize SDL: %s", SDL_GetError());
+            return 1;
+        }
+
         sigaction(SIGINT, &action, NULL);
 
         DesktopCommandServerCallbacks commandCallbacks;

@@ -41,79 +41,79 @@ IHUAnyThreadInterface* g_hu = nullptr;
 
 static void nightmode_thread_func(std::condition_variable& quitcv, std::mutex& quitmutex) 
 {
-	int nightmode = NM_NO_VALUE;
-	mzd_nightmode_start();
+    int nightmode = NM_NO_VALUE;
+    mzd_nightmode_start();
     while (true)
-	{		
-		int nightmodenow = mzd_is_night_mode_set();
+    {        
+        int nightmodenow = mzd_is_night_mode_set();
 
-		// We send nightmode status periodically, otherwise Google Maps
-		// doesn't switch to nightmode if it's started late. Even if the
-		// other AA UI is already in nightmode.
-		if (nightmodenow != NM_NO_VALUE) {
-			nightmode = nightmodenow;
+        // We send nightmode status periodically, otherwise Google Maps
+        // doesn't switch to nightmode if it's started late. Even if the
+        // other AA UI is already in nightmode.
+        if (nightmodenow != NM_NO_VALUE) {
+            nightmode = nightmodenow;
 
-			g_hu->hu_queue_command([nightmodenow](IHUConnectionThreadInterface& s)
-			{
-				HU::SensorEvent sensorEvent;
-				sensorEvent.add_night_mode()->set_is_night(nightmodenow);
+            g_hu->hu_queue_command([nightmodenow](IHUConnectionThreadInterface& s)
+            {
+                HU::SensorEvent sensorEvent;
+                sensorEvent.add_night_mode()->set_is_night(nightmodenow);
 
-				s.hu_aap_enc_send_message(0, AA_CH_SEN, HU_SENSOR_CHANNEL_MESSAGE::SensorEvent, sensorEvent);
-			});
-		}
-		
-		{
-			std::unique_lock<std::mutex> lk(quitmutex);
-    		if (quitcv.wait_for(lk, std::chrono::milliseconds(1000)) == std::cv_status::no_timeout)
-    		{
-    			break;
-    		}
-		}
-	}
+                s.hu_aap_enc_send_message(0, AA_CH_SEN, HU_SENSOR_CHANNEL_MESSAGE::SensorEvent, sensorEvent);
+            });
+        }
+        
+        {
+            std::unique_lock<std::mutex> lk(quitmutex);
+            if (quitcv.wait_for(lk, std::chrono::milliseconds(1000)) == std::cv_status::no_timeout)
+            {
+                break;
+            }
+        }
+    }
 
-	mzd_nightmode_stop();
+    mzd_nightmode_stop();
 }
 
 void gps_location_handler(uint64_t timestamp, double lat, double lng, double bearing, double speed, double alt, double accuracy) {
-	logd("[LOC][%" PRIu64 "] - Lat: %f Lng: %f Brng: %f Spd: %f Alt: %f Acc: %f \n", 
-			timestamp, lat, lng, bearing, speed, alt, accuracy);
+    logd("[LOC][%" PRIu64 "] - Lat: %f Lng: %f Brng: %f Spd: %f Alt: %f Acc: %f \n", 
+            timestamp, lat, lng, bearing, speed, alt, accuracy);
 
-	g_hu->hu_queue_command([timestamp, lat, lng, bearing, speed, alt, accuracy](IHUConnectionThreadInterface& s)
-	{
-		HU::SensorEvent sensorEvent;
-		HU::SensorEvent::LocationData* location = sensorEvent.add_location_data();
-		location->set_timestamp(timestamp);
-		location->set_latitude(static_cast<int32_t>(lat * 1E7));
-		location->set_longitude(static_cast<int32_t>(lng * 1E7));
+    g_hu->hu_queue_command([timestamp, lat, lng, bearing, speed, alt, accuracy](IHUConnectionThreadInterface& s)
+    {
+        HU::SensorEvent sensorEvent;
+        HU::SensorEvent::LocationData* location = sensorEvent.add_location_data();
+        location->set_timestamp(timestamp);
+        location->set_latitude(static_cast<int32_t>(lat * 1E7));
+        location->set_longitude(static_cast<int32_t>(lng * 1E7));
 
-		if (bearing != 0) {
-			location->set_bearing(static_cast<int32_t>(bearing * 1E6));
-		}
+        if (bearing != 0) {
+            location->set_bearing(static_cast<int32_t>(bearing * 1E6));
+        }
 
-		// AA expects speed in knots, so convert back
-		location->set_speed(static_cast<int32_t>((speed / 1.852) * 1E3));
+        // AA expects speed in knots, so convert back
+        location->set_speed(static_cast<int32_t>((speed / 1.852) * 1E3));
 
-		if (alt != 0) {
-			location->set_altitude(static_cast<int32_t>(alt * 1E2));
-		}
+        if (alt != 0) {
+            location->set_altitude(static_cast<int32_t>(alt * 1E2));
+        }
 
-		location->set_accuracy(static_cast<int32_t>(accuracy * 1E3));
+        location->set_accuracy(static_cast<int32_t>(accuracy * 1E3));
 
-		s.hu_aap_enc_send_message(0, AA_CH_SEN, HU_SENSOR_CHANNEL_MESSAGE::SensorEvent, sensorEvent);
-	});
+        s.hu_aap_enc_send_message(0, AA_CH_SEN, HU_SENSOR_CHANNEL_MESSAGE::SensorEvent, sensorEvent);
+    });
 }
 
 
 int main (int argc, char *argv[])
-{	
-	//Force line-only buffering so we can see the output during hangs
-	setvbuf(stdout, NULL, _IOLBF, 0);
-	setvbuf(stderr, NULL, _IOLBF, 0);
+{    
+    //Force line-only buffering so we can see the output during hangs
+    setvbuf(stdout, NULL, _IOLBF, 0);
+    setvbuf(stderr, NULL, _IOLBF, 0);
 
-	GOOGLE_PROTOBUF_VERIFY_VERSION;
+    GOOGLE_PROTOBUF_VERIFY_VERSION;
 
-	hu_log_library_versions();
-	hu_install_crash_handler();
+    hu_log_library_versions();
+    hu_install_crash_handler();
 
     DBus::_init_threading();
 
@@ -224,6 +224,6 @@ int main (int argc, char *argv[])
         return 1;
     }
 
-	return 0;
+    return 0;
 }
 

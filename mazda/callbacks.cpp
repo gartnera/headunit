@@ -9,14 +9,15 @@
 using json = nlohmann::json;
 
 MazdaEventCallbacks::MazdaEventCallbacks(DBus::Connection& serviceBus, DBus::Connection& hmiBus)
-    : serviceBus(serviceBus)
+    : micInput("mic")
+    , serviceBus(serviceBus)
     , hmiBus(hmiBus)
     , connected(false)
     , videoFocus(false)
     , audioFocus(false)
 {
     //no need to create/destroy this
-    audioOutput.reset(new AudioOutput("default", true));
+    audioOutput.reset(new AudioOutput("entertainmentUsb", true));
     audioMgrClient.reset(new AudioManagerClient(*this, serviceBus));
     videoMgrClient.reset(new VideoManagerClient(*this, hmiBus));
 }

@@ -27,14 +27,14 @@ public:
 
 class MicInput
 {
-    snd_pcm_t* mic_handle = nullptr;
+    std::string micDevice;
     std::thread mic_readthread;
     int cancelPipeRead = -1, cancelPipeWrite = -1;
 
-    snd_pcm_sframes_t read_mic_cancelable(void *buffer, snd_pcm_uframes_t size, bool* canceled);
+    snd_pcm_sframes_t read_mic_cancelable(snd_pcm_t* mic_handle, void *buffer, snd_pcm_uframes_t size, bool* canceled);
     void MicThreadMain(IHUAnyThreadInterface* threadInterface);
 public:
-    MicInput();
+    MicInput(const std::string& micDevice = "default");
     ~MicInput();
 
     void Start(IHUAnyThreadInterface* threadInterface);

@@ -87,7 +87,7 @@ void AudioOutput::MediaPacket(snd_pcm_t *pcm, const byte *buf, int len)
     }
 }
 
-snd_pcm_sframes_t MicInput::read_mic_cancelable(void *buffer, snd_pcm_uframes_t size, bool* canceled)
+snd_pcm_sframes_t MicInput::read_mic_cancelable(snd_pcm_t* mic_handle, void *buffer, snd_pcm_uframes_t size, bool* canceled)
 {
     int pollfdAllocCount = snd_pcm_poll_descriptors_count(mic_handle);
     struct pollfd* pfds = (struct pollfd*)alloca((pollfdAllocCount + 1) * sizeof(struct pollfd));
@@ -131,15 +131,34 @@ snd_pcm_sframes_t MicInput::read_mic_cancelable(void *buffer, snd_pcm_uframes_t 
 void MicInput::MicThreadMain(IHUAnyThreadInterface* threadInterface)
 {
     pthread_setname_np(pthread_self(), "mic_thread");
+
+    snd_pcm_t* mic_handle = nullptr;
+
     int err = 0;
+    if ((err = snd_pcm_open(&mic_handle, micDevice.c_str(), SND_PCM_STREAM_CAPTURE,  SND_PCM_NONBLOCK)) < 0) 
+    {
+        loge("Playback open error: %s\n", snd_strerror(err));
+        return;
+    }
+
+    if ((err = snd_pcm_set_params(mic_handle, SND_PCM_FORMAT_S16_LE, SND_PCM_ACCESS_RW_INTERLEAVED, 1,16000, 1, 250000)) < 0) 
+    {   /* 0.25sec */
+        loge("Playback open error: %s\n", snd_strerror(err));
+        snd_pcm_close(mic_handle);
+        return;
+    }
     if ((err = snd_pcm_prepare(mic_handle)) < 0)
     {
         loge("snd_pcm_prepare: %s\n", snd_strerror(err));
+        snd_pcm_close(mic_handle);
+        return;
     }
 
     if ((err = snd_pcm_start(mic_handle)) < 0)
     {
         loge("snd_pcm_start: %s\n", snd_strerror(err));
+        snd_pcm_close(mic_handle);
+        return;
     }
 
     const size_t tempSize = 1024*1024;
@@ -148,7 +167,7 @@ void MicInput::MicThreadMain(IHUAnyThreadInterface* threadInterface)
     while(!canceled)
     {
         uint8_t* tempBuffer = new uint8_t[tempSize];
-        snd_pcm_sframes_t frames = read_mic_cancelable(tempBuffer, bufferFrameCount, &canceled);
+        snd_pcm_sframes_t frames = read_mic_cancelable(mic_handle, tempBuffer, bufferFrameCount, &canceled);
         if (frames < 0)
         {
             if (frames == -ESTRPIPE)
@@ -160,7 +179,7 @@ void MicInput::MicThreadMain(IHUAnyThreadInterface* threadInterface)
                 }
                 else
                 {
-                    frames = read_mic_cancelable(tempBuffer, bufferFrameCount, &canceled);
+                    frames = read_mic_cancelable(mic_handle, tempBuffer, bufferFrameCount, &canceled);
                 }
             }
 
@@ -183,9 +202,11 @@ void MicInput::MicThreadMain(IHUAnyThreadInterface* threadInterface)
     {
         loge("snd_pcm_drop: %s\n", snd_strerror(err));
     }
+
+    snd_pcm_close(mic_handle);
 }
 
-MicInput::MicInput()
+MicInput::MicInput(const std::string& micDevice) : micDevice(micDevice)
 {
     int cancelPipe[2];
     if (pipe(cancelPipe) < 0)
@@ -194,29 +215,11 @@ MicInput::MicInput()
     }
     cancelPipeRead = cancelPipe[0];
     cancelPipeWrite = cancelPipe[1];
-
-    int err = 0;
-    if ((err = snd_pcm_open(&mic_handle, "default", SND_PCM_STREAM_CAPTURE,  SND_PCM_NONBLOCK)) < 0) {
-        loge("Playback open error: %s\n", snd_strerror(err));
-    }
-    if ((err = snd_pcm_set_params(mic_handle, SND_PCM_FORMAT_S16_LE, SND_PCM_ACCESS_RW_INTERLEAVED, 1,16000, 1, 250000)) < 0) {   /* 0.25sec */
-        loge("Playback open error: %s\n", snd_strerror(err));
-    }
-    if ((err = snd_pcm_prepare(mic_handle)) < 0)
-    {
-        loge("snd_pcm_prepare: %s\n", snd_strerror(err));
-    }
-
-    if ((err = snd_pcm_drop(mic_handle)) < 0)
-    {
-        loge("snd_pcm_drop: %s\n", snd_strerror(err));
-    }
 }
 
 MicInput::~MicInput()
 {
     Stop();
-    snd_pcm_close(mic_handle);
 
     close(cancelPipeRead);
     close(cancelPipeWrite);
@@ -224,7 +227,7 @@ MicInput::~MicInput()
 
 void MicInput::Start(IHUAnyThreadInterface* threadInterface)
 {
-    if (mic_handle && !mic_readthread.joinable())
+    if (!mic_readthread.joinable())
     {
         mic_readthread = std::thread([this, threadInterface](){ MicThreadMain(threadInterface);});
     }
@@ -232,7 +235,7 @@ void MicInput::Start(IHUAnyThreadInterface* threadInterface)
 
 void MicInput::Stop()
 {
-    if (mic_handle && mic_readthread.joinable())
+    if (mic_readthread.joinable())
     {
         //write single byte
         write(cancelPipeWrite, &cancelPipeWrite, 1);
