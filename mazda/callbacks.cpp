@@ -142,10 +142,22 @@ void MazdaEventCallbacks::AudioFocusHappend(int chan, bool hasFocus) {
 }
 
 VideoManagerClient::VideoManagerClient(MazdaEventCallbacks& callbacks, DBus::Connection& hmiBus)
-        : DBus::ObjectProxy(hmiBus, "/com/jci/bucpsa", "com.jci.bucpsa"), guiClient(hmiBus), callbacks(callbacks)
+    : DBus::ObjectProxy(hmiBus, "/com/jci/bucpsa", "com.jci.bucpsa")
+		, guiClient(hmiBus)
+		, callbacks(callbacks)
+		, bthfMgr(hmiBus)
 {
-    uint32_t currentDisplayMode;
-    int32_t returnValue;
+  uint32_t currentDisplayMode;
+  int32_t returnValue;
+	uint32_t bthfstate;
+	uint32_t call1status;
+	uint32_t call2status;
+	::DBus::Struct< std::vector< uint8_t > > call1Number;
+	::DBus::Struct< std::vector< uint8_t > > call2Number;
+	// check if we are in a phone call
+	bthfMgr.CallStatus(bthfstate, call1status, call2status, call1Number, call2Number);
+	inActiveCall = (bool)bthfstate;
+	printf("inActiveCall: %s", inActiveCall ? "Yes\n" : "No\n");
     // check if backup camera is not visible at the moment and get output only when not
     GetDisplayMode(currentDisplayMode, returnValue);
     allowedToGetFocus = !(bool)currentDisplayMode;
@@ -191,7 +203,8 @@ void VideoManagerClient::requestVideoFocus(VIDEO_FOCUS_REQUESTOR requestor)
 
 void VideoManagerClient::releaseVideoFocus(VIDEO_FOCUS_REQUESTOR requestor)
 {
-    if (!callbacks.videoFocus) {
+    if (!callbacks.videoFocus || inActiveCall) {
+		printf("Video Focus Not Released");
         return;
     }
     bool unrequested = requestor != VIDEO_FOCUS_REQUESTOR::ANDROID_AUTO;
@@ -331,7 +344,7 @@ void AudioManagerClient::populateStreamTable()
 
 AudioManagerClient::AudioManagerClient(MazdaEventCallbacks& callbacks, DBus::Connection &connection)
     : DBus::ObjectProxy(connection, "/com/xse/service/AudioManagement/AudioApplication", "com.xsembedded.service.AudioManagement")
-    ,bthfMgr(connection), callbacks(callbacks)
+	, callbacks(callbacks)
 {
     populateStreamTable();
     if (usbSessionID < 0)
@@ -463,5 +476,3 @@ void AudioManagerClient::Notify(const std::string &signalName, const std::string
         }
     }
 }
-
-

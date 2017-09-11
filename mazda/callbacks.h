@@ -66,9 +66,11 @@ public:
           : DBus::ObjectProxy(connection, "/com/jci/bthf", "com.jci.bthf")
   {
   }
+  virtual void CallStatus(const uint32_t& bthfstate, const uint32_t& call1status, const uint32_t& call2status, const ::DBus::Struct< std::vector< uint8_t > >& call1Number, const ::DBus::Struct< std::vector< uint8_t > >& call2Number) override  {
+		printf("bthfstatus: %i\n=====Call1: %i\n=====Call2: %i\n", bthfstate, call1status, call2status);
+	}
   virtual void BatteryIndicator(const uint32_t& minValue, const uint32_t& maxValue, const uint32_t& currentValue) override {}
   virtual void SignalStrength(const uint32_t& minValue, const uint32_t& maxValue, const uint32_t& currentValue) override {}
-  virtual void CallStatus(const uint32_t& bthfstate, const uint32_t& call1status, const uint32_t& call2status, const ::DBus::Struct< std::vector< uint8_t > >& call1Number, const ::DBus::Struct< std::vector< uint8_t > >& call2Number) override {}
   virtual void RoamIndicator(const uint32_t& value) override {}
   virtual void NewServiceIndicator(const bool& value) override {}
   virtual void PhoneChargeIndicator(const uint32_t& value) override {}
@@ -78,7 +80,9 @@ public:
   virtual void BthfReadyStatus(const uint32_t& hftReady, const uint32_t& reasonCode) override {}
   virtual void BthfBusyReason(const uint32_t& busyReason) override {}
   virtual void MicStatus(const bool& isMicMuted) override {}
-  virtual void BargeinStatus(const bool& isBargeinActive) override {}
+  virtual void BargeinStatus(const bool& isBargeinActive) override {
+	  printf("BargeinStatus: %s", isBargeinActive ? "On\n" : "Off\n");
+  }
   virtual void BthfSettingsResponse(const ::DBus::Struct< std::vector< uint8_t > >& callsettings) override {}
   virtual void FailureReasonCodes(const uint32_t& errorType) override {}
 };
@@ -98,7 +102,6 @@ class AudioManagerClient : public com::xsembedded::ServiceProvider_proxy,
     //These IDs are usually the same, but they depend on the startup order of the services on the car so we can't assume them 100% reliably
     void populateStreamTable();
     MazdaEventCallbacks& callbacks;
-    BTHFManagerClient bthfMgr;
 public:
     AudioManagerClient(MazdaEventCallbacks& callbacks, DBus::Connection &connection);
     ~AudioManagerClient();
@@ -121,10 +124,12 @@ enum class VIDEO_FOCUS_REQUESTOR : u_int8_t {
 class VideoManagerClient : public com::jci::bucpsa_proxy,
                            public DBus::ObjectProxy {
     bool allowedToGetFocus = true;
+    bool inActiveCall = false;
     bool waitsForFocus = false;
 
     MazdaEventCallbacks& callbacks;
     NativeGUICtrlClient guiClient;
+    BTHFManagerClient bthfMgr;
 public:
     VideoManagerClient(MazdaEventCallbacks& callbacks, DBus::Connection &hmiBus);
     ~VideoManagerClient();
