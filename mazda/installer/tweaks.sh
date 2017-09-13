@@ -203,6 +203,14 @@ revert_cmu_files()
             fi
         fi
     fi
+    if [ -e /etc/asound.conf.org ]; then
+        log_message "Reverting asound.conf ... "
+        if mv /etc/asound.conf.org /etc/asound.conf; then
+            log_message "OK\n"
+        else
+            log_message "FAILED\n"
+        fi
+    fi
 }
 
 copy_aa_binaries()

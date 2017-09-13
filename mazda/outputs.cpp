@@ -274,6 +274,18 @@ void VideoOutput::input_thread_func()
                         printf("KEY_R\n");
                         //NAV
                         break;
+                    case KEY_Z: // CALL ANS
+                        printf("KEY_Z\n");
+                        scanCode = HUIB_PHONE;
+                        break;
+                    case KEY_X: // CALL END
+                        printf("KEY_X\n");
+                        scanCode = 6;
+                        break;
+                    case KEY_T: // FAV
+                        printf("KEY_T\n");
+                        scanCode = 3; // 3 is previous AA home
+                        break;
                     }
                     if (scanCode != 0 || scrollAmount != 0)
                     {

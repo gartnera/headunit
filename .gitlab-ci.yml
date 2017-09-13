@@ -1,0 +1,11 @@
+before_script:
+  - git submodule sync --recursive
+  - git submodule update --init --recursive
+  - apt-get update -qq && apt-get install -y -qq make libstdc++6 libstdc++-4.8-dev libdbus-c++-bin
+  - LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu/:$LD_LIBRARY_PATH && export LD_LIBRARY_PATH
+
+rspec:
+  script:
+    - cd mazda
+    - sed -i 's/.\/dbusxx-xml2cpp/dbusxx-xml2cpp/g' Makefile
+    - make
