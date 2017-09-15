@@ -124,7 +124,7 @@
     ret = read(readfd, buf, len);
     if (ret < 0) {
       loge ("ihu_tra_recv() error so stop Transport & AAP  ret: %d", ret);
-      hu_aap_stop (); 
+      hu_aap_stop ();
     }
     return (ret);
   }
@@ -138,23 +138,23 @@
       return (-1);
     }
 
-	
+
     int ret = transport->Write(buf, len, tmo);
     if (ret < 0 || ret != len) {
       if (retry == 0) {
         loge ("Error ihu_tra_send() error so stop Transport & AAP  ret: %d  len: %d", ret, len);
 		    hu_aap_stop ();
 
-	     }   
+	     }
       return (-1);
-    }  
+    }
 
     if (ena_log_verbo && ena_log_aap_send)
       logd ("OK ihu_tra_send() ret: %d  len: %d", ret, len);
     return (ret);
   }
 
-  
+
   int HUServer::hu_aap_enc_send_message(int retry, int chan, uint16_t messageCode, const google::protobuf::MessageLite& message, int overrideTimeout)
   {
     const int messageSize = message.ByteSize();
@@ -170,7 +170,7 @@
     if (!message.SerializeToArray(destMessageCode, messageSize))
     {
       loge("AppendToString failed for %s", message.GetTypeName().c_str());
-      return -1; 
+      return -1;
     }
 
     logd ("Send %s on channel %i %s", message.GetTypeName().c_str(), chan, chan_get(chan));
@@ -237,7 +237,7 @@
         int rmv = hu_aad_dmp (prefix, "HU", chan, flags, &buf[frag_start], cur_len);
       }
   #endif
-  	
+
 
       int bytes_written = SSL_write (hu_ssl_ssl, &buf[frag_start], cur_len);               // Write plaintext to SSL
       if (bytes_written <= 0) {
@@ -262,9 +262,9 @@
         *((uint32_t*)&enc_buf[header_size]) = htobe32(len);
         header_size += 4;
       }
-      
-      int bytes_read = BIO_read (hu_ssl_wm_bio, & enc_buf [header_size], sizeof (enc_buf) - header_size); // Read encrypted from SSL BIO to enc_buf + 
-          
+
+      int bytes_read = BIO_read (hu_ssl_wm_bio, & enc_buf [header_size], sizeof (enc_buf) - header_size); // Read encrypted from SSL BIO to enc_buf +
+
       if (bytes_read <= 0) {
         loge ("BIO_read() bytes_read: %d", bytes_read);
         hu_aap_stop ();
@@ -273,7 +273,7 @@
       if (ena_log_verbo && ena_log_aap_send)
         logd ("BIO_read() bytes_read: %d", bytes_read);
 
-      
+
 
       *((uint16_t*)&enc_buf[2]) = htobe16(bytes_read);
 
@@ -327,7 +327,7 @@
         int rmv = hu_aad_dmp (prefix, "HU", chan, flags, &buf[frag_start], cur_len);
       }
   #endif
-    
+
       enc_buf [0] = (byte) chan;                                              // Encode channel and flags
       enc_buf [1] = flags;
       *((uint16_t*)&enc_buf[2]) = htobe16(cur_len);
@@ -381,7 +381,7 @@
     if (!message.SerializeToArray(destMessageCode, messageSize))
     {
       loge("AppendToString failed for %s", message.GetTypeName().c_str());
-      return -1; 
+      return -1;
     }
 
     logd ("Send %s on channel %i %s", message.GetTypeName().c_str(), chan, chan_get(chan));
@@ -390,7 +390,7 @@
   }
 
 
-  int HUServer::hu_handle_VersionResponse (int chan, byte * buf, int len) {         
+  int HUServer::hu_handle_VersionResponse (int chan, byte * buf, int len) {
 
     logd ("Version response recv len: %d", len);
     hex_dump("version", 40, buf, len);
@@ -425,7 +425,7 @@
     carInfo.set_hide_clock(false);
 
     carInfo.mutable_channels()->Reserve(AA_CH_MAX);
-    
+
     HU::ChannelDescriptor* inputChannel = carInfo.add_channels();
     inputChannel->set_channel_id(AA_CH_TOU);
     {
@@ -435,25 +435,29 @@
       tsConfig->set_height(480);
 
       //No idea what these mean since they aren't the same as HU_INPUT_BUTTON
-      //1 seems to be "show cursor"
-      inner->add_keycodes_supported(1);
-      inner->add_keycodes_supported(2);
-      inner->add_keycodes_supported(4);
-      inner->add_keycodes_supported(HUIB_BACK);
-      inner->add_keycodes_supported(HUIB_UP);
-      inner->add_keycodes_supported(HUIB_DOWN);
-      inner->add_keycodes_supported(HUIB_LEFT);
-      inner->add_keycodes_supported(HUIB_RIGHT);
-      inner->add_keycodes_supported(HUIB_ENTER);
-      inner->add_keycodes_supported(HUIB_MIC);
-      inner->add_keycodes_supported(HUIB_PLAYPAUSE);
-      inner->add_keycodes_supported(HUIB_NEXT);
-      inner->add_keycodes_supported(HUIB_PREV);
-      inner->add_keycodes_supported(HUIB_PHONE);
+      inner->add_keycodes_supported(HUIB_MENU); // 0x01 Open menu
+      inner->add_keycodes_supported(HUIB_MIC1); // 0x02 Mic
+      inner->add_keycodes_supported(HUIB_HOME); // 0x03 AA home
+      inner->add_keycodes_supported(HUIB_BACK); // 0x04 Back
+      inner->add_keycodes_supported(HUIB_PHONE); // 0x05 Phone screen
+      inner->add_keycodes_supported(HUIB_CALLEND); // 0x06 End call??
+      inner->add_keycodes_supported(HUIB_NAV); // 0x07 This one is not correct
+      inner->add_keycodes_supported(HUIB_UP); // 0x13 Up
+      inner->add_keycodes_supported(HUIB_DOWN); // 0x14 Down
+      inner->add_keycodes_supported(HUIB_LEFT); // 0x15 Menu again
+      inner->add_keycodes_supported(HUIB_RIGHT); // 0x16 Mic again
+      inner->add_keycodes_supported(HUIB_ENTER); // 0x17 Select
+      inner->add_keycodes_supported(HUIB_MIC); // 0x54 Mic again
+      inner->add_keycodes_supported(HUIB_PLAYPAUSE); // 0x55 Play/Pause
+      inner->add_keycodes_supported(HUIB_NEXT); // 0x57 Next track
+      inner->add_keycodes_supported(HUIB_PREV); // 0x58 Prev Track
       inner->add_keycodes_supported(HUIB_SCROLLWHEEL);
+      // Might as well include these even if we dont use them
+      inner->add_keycodes_supported(HUIB_START); // 0x7E (126) Start media
+      inner->add_keycodes_supported(HUIB_STOP); // 0x7F (127) Stop media
 
       callbacks.CustomizeInputConfig(*inner);
-      
+
     }
 
     HU::ChannelDescriptor* sensorChannel = carInfo.add_channels();
@@ -493,6 +497,7 @@
       audioConfig->set_sample_rate(48000);
       audioConfig->set_bit_depth(16);
       audioConfig->set_channel_count(2);
+      inner->set_available_while_in_call(true);
 
       callbacks.CustomizeOutputChannel(AA_CH_AUD, *inner);
     }
@@ -564,7 +569,6 @@
   }
 
 
-  
   int HUServer::hu_handle_PingRequest (int chan, byte * buf, int len) {                  // Ping Request
     HU::PingRequest request;
     if (!request.ParseFromArray(buf, len))
@@ -608,9 +612,9 @@
 
     return (-1);
   }
-  
+
   int HUServer::hu_handle_VoiceSessionRequest (int chan, byte * buf, int len) {                  // sr:  00000000 00 11 08 01      Microphone voice search usage     sr:  00000000 00 11 08 02
-    
+
     HU::VoiceSessionRequest request;
     if (!request.ParseFromArray(buf, len))
       loge ("Voice Session Notification");
@@ -656,11 +660,11 @@
       HU::SensorEvent sensorEvent;
       sensorEvent.add_driving_status()->set_status(HU::SensorEvent::DrivingStatus::DRIVE_STATUS_UNRESTRICTED);
       return hu_aap_enc_send_message(0, AA_CH_SEN, HU_SENSOR_CHANNEL_MESSAGE::SensorEvent, sensorEvent);
-    } 
+    }
     return (ret);
   }
 
-  int HUServer::hu_handle_MediaSetupRequest(int chan, byte * buf, int len) {  
+  int HUServer::hu_handle_MediaSetupRequest(int chan, byte * buf, int len) {
 
     HU::MediaSetupRequest request;
     if (!request.ParseFromArray(buf, len))
@@ -684,7 +688,7 @@
   }
 
 
-  int HUServer::hu_handle_VideoFocusRequest(int chan, byte * buf, int len) {  
+  int HUServer::hu_handle_VideoFocusRequest(int chan, byte * buf, int len) {
 
     HU::VideoFocusRequest request;
     if (!request.ParseFromArray(buf, len))
@@ -699,7 +703,7 @@
 
 
   int HUServer::hu_handle_MediaStartRequest(int chan, byte * buf, int len) {                  // sr:  00000000 00 11 08 01      Microphone voice search usage     sr:  00000000 00 11 08 02
-    
+
     HU::MediaStartRequest request;
     if (!request.ParseFromArray(buf, len))
       loge ("MediaStartRequest");
@@ -712,7 +716,7 @@
 
 
   int HUServer::hu_handle_MediaStopRequest(int chan, byte * buf, int len) {                  // sr:  00000000 00 11 08 01      Microphone voice search usage     sr:  00000000 00 11 08 02
-    
+
     HU::MediaStopRequest request;
     if (!request.ParseFromArray(buf, len))
       loge ("MediaStopRequest");
@@ -736,8 +740,8 @@
 
     return hu_aap_enc_send_message(0, chan, HU_SENSOR_CHANNEL_MESSAGE::SensorStartResponse, response);
   }
-  
-  
+
+
   int HUServer::hu_handle_BindingRequest (int chan, byte * buf, int len) {                  // Navigation Focus Request
     HU::BindingRequest request;
     if (!request.ParseFromArray(buf, len))
@@ -800,7 +804,7 @@
   }
 
   int HUServer::hu_handle_MediaData(int chan, byte * buf, int len) {
-    
+
     int ret  = callbacks.MediaPacket(chan, 0, buf, len);
     if (ret < 0)
     {
@@ -959,7 +963,7 @@
       }
       hu_thread.join();
     }
-   
+
     if (command_write_fd >= 0)
       close(command_write_fd);
     command_write_fd = -1;
@@ -975,7 +979,7 @@
     int ret = ihu_tra_stop ();                                           // Stop Transport/USBACC/OAP
     iaap_state = hu_STATE_STOPPED;
     logd ("  SET: iaap_state: %d (%s)", iaap_state, state_get (iaap_state));
-    
+
     return (ret);
   }
 
@@ -1083,7 +1087,7 @@
       loge ("CHECK: iaap_state: %d (%s)", iaap_state, state_get (iaap_state));
       return (0);
     }
-    
+
     pthread_setname_np(pthread_self(), "main_thread");
 
     iaap_state = hu_STATE_STARTIN;
@@ -1101,7 +1105,7 @@
     if (ret < 0) {
       loge ("Version request send ret: %d", ret);
       return (-1);
-    }  
+    }
 
     while(iaap_state == hu_STATE_STARTIN)
     {
@@ -1112,7 +1116,7 @@
       }
     }
 
-    
+
     int pipefd[2];
     ret = pipe2(pipefd, O_DIRECT);
     if (ret < 0)
@@ -1132,7 +1136,7 @@
     return (0);
   }
 
-  int HUServer::hu_aap_recv_process (int tmo) {                                          // 
+  int HUServer::hu_aap_recv_process (int tmo) {                                          //
                                                                         // Terminate unless started or starting (we need to process when starting)
     if (iaap_state != hu_STATE_STARTED && iaap_state != hu_STATE_STARTIN) {
       loge ("CHECK: iaap_state: %d (%s)", iaap_state, state_get (iaap_state));
@@ -1144,24 +1148,24 @@
     int min_size_hdr = 4;
     int have_len = 0;                                                   // Length remaining to process for all sub-packets plus 4/8 byte headers
 
-  
+
     temp_assembly_buffer.clear();
 
     bool has_last = false;
     bool has_first = false;
     int chan = -1;
-    while (!has_last) 
+    while (!has_last)
     {                                              // While length remaining to process,... Process Rx packet:
       have_len = hu_aap_tra_recv (enc_buf, min_size_hdr, tmo);
       if (have_len == 0 && !has_first)
       {
         return 0;
       }
-      
+
       if (have_len < min_size_hdr) {                                      // If we don't have a full 6 byte header at least...
         loge ("Recv have_len: %d", have_len);
         return (-1);
-      }  
+      }
 
       if (ena_log_verbo) {
         logd ("Recv while (have_len > 0): %d", have_len);
@@ -1202,7 +1206,7 @@
         if (got_bytes < 0) {                                      // If we don't have a full 6 byte header at least...
           loge ("Recv got_bytes: %d", got_bytes);
           return (-1);
-        }  
+        }
         have_len += got_bytes;
         remaining_bytes_in_frame -= got_bytes;
       }
@@ -1223,7 +1227,7 @@
       }
       else
       {
-        temp_assembly_buffer.reserve(frame_len); 
+        temp_assembly_buffer.reserve(frame_len);
       }
 
 
@@ -1267,7 +1271,7 @@
       ret = iaap_msg_process (chan, msg_type, &temp_assembly_buffer[2], buf_len - 2);          // Decrypt & Process 1 received encrypted message
       if (ret < 0 && iaap_state != hu_STATE_STOPPED) {                                                    // If error...
         loge ("Error iaap_msg_process() ret: %d  ", ret);
-        return (ret);  
+        return (ret);
       }
     }
 

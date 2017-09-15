@@ -270,9 +270,23 @@ void VideoOutput::input_thread_func()
                             callbacks->releaseVideoFocus();
                         }
                         break;
-                    case KEY_R:
+                    case KEY_R: // NAV
                         printf("KEY_R\n");
-                        //NAV
+                        if (isPressed) {
+                            callbacks->takeVideoFocus();
+                        }
+                        break;
+                    case KEY_Z: // CALL ANS
+                        printf("KEY_Z\n");
+                        scanCode = HUIB_PHONE;
+                        break;
+                    case KEY_X: // CALL END
+                        printf("KEY_X\n");
+                        scanCode = HUIB_CALLEND;
+                        break;
+                    case KEY_T: // FAV
+                        printf("KEY_T\n");
+                        scanCode = HUIB_HOME;
                         break;
                     }
                     if (scanCode != 0 || scrollAmount != 0)

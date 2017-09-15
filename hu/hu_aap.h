@@ -53,8 +53,8 @@ public:
   virtual int Stop() = 0;
   virtual int Write(const byte* buf, int len, int tmo) = 0;
 
-  inline int GetReadFD() { return readfd; }  
-  inline int GetErrorFD() { return errorfd; } 
+  inline int GetReadFD() { return readfd; }
+  inline int GetErrorFD() { return errorfd; }
 };
 
 enum class HU_TRANSPORT_TYPE
@@ -111,7 +111,7 @@ public:
     return hu_aap_unenc_send_message(retry, chan, static_cast<uint16_t>(messageCode), message, overrideTimeout);
   }
 
-  virtual int hu_aap_stop() = 0;  
+  virtual int hu_aap_stop() = 0;
 };
 
 //These callbacks are executed in the HU thread
@@ -199,7 +199,7 @@ protected:
   int hu_aap_tra_recv (byte * buf, int len, int tmo);                      // Used by intern,                      hu_ssl
   int hu_aap_tra_send (int retry, byte * buf, int len, int tmo);                      // Used by intern,                      hu_ssl
   int hu_aap_enc_send (int retry, int chan, byte * buf, int len, int overrideTimeout = -1);                     // Used by intern,            hu_jni     // Encrypted Send
-  int hu_aap_unenc_send (int retry, int chan, byte * buf, int len, int overrideTimeout = -1); 
+  int hu_aap_unenc_send (int retry, int chan, byte * buf, int len, int overrideTimeout = -1);
 
   int hu_aap_recv_process (int tmo);                                              // Used by          hu_mai,  hu_jni     // Process 1 encrypted receive message set:
                                                                                                                           // Respond to decrypted message
@@ -207,13 +207,13 @@ protected:
   virtual int hu_aap_enc_send_media_packet(int retry, int chan, uint16_t messageCode, uint64_t timeStamp, const byte* buffer, int bufferLen, int overrideTimeout = -1) override;
   virtual int hu_aap_unenc_send_blob(int retry, int chan, uint16_t messageCode, const byte* buffer, int bufferLen, int overrideTimeout = -1) override;
   virtual int hu_aap_unenc_send_message(int retry, int chan, uint16_t messageCode, const google::protobuf::MessageLite& message, int overrideTimeout = -1) override;
-  virtual int hu_aap_stop     () override;    
+  virtual int hu_aap_stop     () override;
 
   using IHUConnectionThreadInterface::hu_aap_enc_send_message;
   using IHUConnectionThreadInterface::hu_aap_enc_send_media_packet;
   using IHUConnectionThreadInterface::hu_aap_unenc_send_blob;
   using IHUConnectionThreadInterface::hu_aap_unenc_send_message;
- 
+
   int hu_handle_VersionResponse (int chan, byte * buf, int len);
   int hu_handle_ServiceDiscoveryRequest (int chan, byte * buf, int len);
   int hu_handle_PingRequest (int chan, byte * buf, int len);
@@ -250,7 +250,7 @@ enum class HU_PROTOCOL_MESSAGE : uint16_t
   MediaDataWithTimestamp = 0x0000,
   MediaData = 0x0001,
   ServiceDiscoveryRequest = 0x0005,
-  ServiceDiscoveryResponse = 0x0006,    
+  ServiceDiscoveryResponse = 0x0006,
   ChannelOpenRequest = 0x0007,
   ChannelOpenResponse = 0x0008,
   PingRequest = 0x000b,
@@ -275,38 +275,42 @@ enum class HU_MEDIA_CHANNEL_MESSAGE : uint16_t
   MicReponse = 0x8006,
   VideoFocusRequest = 0x8007,
   VideoFocus = 0x8008,
-};    
+};
 
 enum class HU_SENSOR_CHANNEL_MESSAGE : uint16_t
 {
   SensorStartRequest = 0x8001,
   SensorStartResponse = 0x8002,
   SensorEvent = 0x8003,
-};    
+};
 
 enum class HU_INPUT_CHANNEL_MESSAGE : uint16_t
 {
   InputEvent = 0x8001,
   BindingRequest = 0x8002,
   BindingResponse = 0x8003,
-};    
+};
 
 enum HU_INPUT_BUTTON
 {
+    HUIB_MIC1 = 0x01,
+    HUIB_MENU = 0x02,
+    HUIB_HOME = 0x03,
+    HUIB_BACK = 0x04,
+    HUIB_PHONE = 0x05,
+    HUIB_CALLEND = 0x06,
+    HUIB_NAV = 0x07,
     HUIB_UP = 0x13,
     HUIB_DOWN = 0x14,
     HUIB_LEFT = 0x15,
     HUIB_RIGHT = 0x16,
-    HUIB_BACK = 0x04,
     HUIB_ENTER = 0x17,
     HUIB_MIC = 0x54,
     HUIB_PLAYPAUSE = 0x55,
     HUIB_NEXT = 0x57,
     HUIB_PREV = 0x58,
-    HUIB_PHONE = 0x5,
-    HUIB_START = 126,
-    HUIB_STOP = 127,
+    HUIB_START = 0x7E,
+    HUIB_STOP = 0x7F,
     HUIB_SCROLLWHEEL = 65536,
-    
-};
 
+};
