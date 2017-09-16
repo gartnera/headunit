@@ -822,8 +822,10 @@
 
   int HUServer::iaap_msg_process (int chan, uint16_t msg_type, byte * buf, int len) {
 
+    printf("iaap_msg_process msg_type: %d  len: %d  buf: %p", msg_type, len, buf);
     if (ena_log_verbo)
       logd ("iaap_msg_process msg_type: %d  len: %d  buf: %p", msg_type, len, buf);
+
 
     int filter_ret = callbacks.MessageFilter(*this, iaap_state, chan, msg_type, buf, len);
     if (filter_ret < 0)
@@ -901,7 +903,7 @@
             return (0);
         }
       }
-      else if (chan == AA_CH_AUD || chan == AA_CH_AU1 || chan == AA_CH_AU2 || chan == AA_CH_VID || chan == AA_CH_MIC)
+      else if (chan == AA_CH_AUD || chan == AA_CH_AU1 || chan == AA_CH_AU2 || chan == AA_CH_VID || chan == AA_CH_MIC || chan == AA_CH_BT)
       {
         switch((HU_MEDIA_CHANNEL_MESSAGE)msg_type)
         {
@@ -918,7 +920,7 @@
           case HU_MEDIA_CHANNEL_MESSAGE::VideoFocusRequest:
             return hu_handle_VideoFocusRequest(chan, buf, len);
           default:
-            loge ("Unknown msg_type: %d", msg_type);
+            loge ("Chan: %s - Unknown msg_type: %d", chan, msg_type);
             return (0);
         }
       }

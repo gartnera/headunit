@@ -66,9 +66,7 @@ public:
           : DBus::ObjectProxy(connection, "/com/jci/bthf", "com.jci.bthf")
   {
   }
-  virtual void CallStatus(const uint32_t& bthfstate, const uint32_t& call1status, const uint32_t& call2status, const ::DBus::Struct< std::vector< uint8_t > >& call1Number, const ::DBus::Struct< std::vector< uint8_t > >& call2Number) override  {
-		printf("bthfstatus: %i\n=====Call1: %i\n=====Call2: %i\n", bthfstate, call1status, call2status);
-	}
+  virtual void CallStatus(const uint32_t& bthfstate, const uint32_t& call1status, const uint32_t& call2status, const ::DBus::Struct< std::vector< uint8_t > >& call1Number, const ::DBus::Struct< std::vector< uint8_t > >& call2Number) override;
   virtual void BatteryIndicator(const uint32_t& minValue, const uint32_t& maxValue, const uint32_t& currentValue) override {}
   virtual void SignalStrength(const uint32_t& minValue, const uint32_t& maxValue, const uint32_t& currentValue) override {}
   virtual void RoamIndicator(const uint32_t& value) override {}
@@ -85,6 +83,11 @@ public:
   }
   virtual void BthfSettingsResponse(const ::DBus::Struct< std::vector< uint8_t > >& callsettings) override {}
   virtual void FailureReasonCodes(const uint32_t& errorType) override {}
+
+  bool inAcitveCall()
+  {
+    return (bool)QueryCallStatus();
+  }
 };
 
 class AudioManagerClient : public com::xsembedded::ServiceProvider_proxy,

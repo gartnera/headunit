@@ -156,9 +156,9 @@ VideoManagerClient::VideoManagerClient(MazdaEventCallbacks& callbacks, DBus::Con
   ::DBus::Struct< std::vector< uint8_t > > call1Number;
   ::DBus::Struct< std::vector< uint8_t > > call2Number;
   // check if we are in a phone call
-  bthfMgr.CallStatus(bthfstate, call1status, call2status, call1Number, call2Number);
-  inActiveCall = (bool)bthfstate;
-  printf("inActiveCall: %s", inActiveCall ? "Yes\n" : "No\n");
+  //bthfMgr.CallStatus(bthfstate, call1status, call2status, call1Number, call2Number);
+  //inActiveCall = bthfMgr.inAcitveCall();
+  printf("VideoManagerClient:inActiveCall: %s", inActiveCall ? "Yes\n" : "No\n");
   // check if backup camera is not visible at the moment and get output only when not
   GetDisplayMode(currentDisplayMode, returnValue);
   allowedToGetFocus = !(bool)currentDisplayMode;
@@ -233,7 +233,11 @@ void VideoManagerClient::DisplayMode(const uint32_t &currentDisplayMode)
         requestVideoFocus(VIDEO_FOCUS_REQUESTOR::BACKUP_CAMERA);
     }
 }
-
+void BTHFManagerClient::CallStatus(const uint32_t& bthfstate, const uint32_t& call1status, const uint32_t& call2status, const ::DBus::Struct< std::vector< uint8_t > >& call1Number, const ::DBus::Struct< std::vector< uint8_t > >& call2Number)
+{
+  // btfhstate = 0 means no call status
+    printf("bthfstate: %i\n====Call1: %i\n====Call2: %i\n", bthfstate, call1status, call2status);
+}
 MazdaCommandServerCallbacks::MazdaCommandServerCallbacks()
 {
 
