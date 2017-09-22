@@ -148,7 +148,7 @@ function AAlogPoll()
                             }
                             
                         };
-                        xhttp.open("GET", "file://localhost" + currentStatus.logPath, true);
+                        xhttp.open("GET", "file://" + currentStatus.logPath, true);
                         xhttp.send();
                     }
                 }
@@ -169,6 +169,7 @@ function AAlogPoll()
 
 _androidautoApp.prototype._StartContextReady = function ()
 {
+    framework.common.setSbDomainIcon("apps/_androidauto/aa.png");
     try
     {
         AAcallCommandServer("GET", "status", function(currentStatus)

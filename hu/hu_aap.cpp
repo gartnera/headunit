@@ -434,22 +434,26 @@
       tsConfig->set_height(480);
 
       //No idea what these mean since they aren't the same as HU_INPUT_BUTTON
-      //1 seems to be "show cursor"
-      inner->add_keycodes_supported(1);
-      inner->add_keycodes_supported(2);
-      inner->add_keycodes_supported(4);
-      inner->add_keycodes_supported(HUIB_BACK);
-      inner->add_keycodes_supported(HUIB_UP);
-      inner->add_keycodes_supported(HUIB_DOWN);
-      inner->add_keycodes_supported(HUIB_LEFT);
-      inner->add_keycodes_supported(HUIB_RIGHT);
-      inner->add_keycodes_supported(HUIB_ENTER);
-      inner->add_keycodes_supported(HUIB_MIC);
-      inner->add_keycodes_supported(HUIB_PLAYPAUSE);
-      inner->add_keycodes_supported(HUIB_NEXT);
-      inner->add_keycodes_supported(HUIB_PREV);
-      inner->add_keycodes_supported(HUIB_PHONE);
+      inner->add_keycodes_supported(HUIB_MENU); // 0x01 Open menu
+      inner->add_keycodes_supported(HUIB_MIC1); // 0x02 Mic
+      inner->add_keycodes_supported(HUIB_HOME); // 0x03 AA home
+      inner->add_keycodes_supported(HUIB_BACK); // 0x04 Back
+      inner->add_keycodes_supported(HUIB_PHONE); // 0x05 Phone screen
+      inner->add_keycodes_supported(HUIB_CALLEND); // 0x06 End call??
+      //inner->add_keycodes_supported(HUIB_NAV); // 0x07 Nav (This one is not correct)
+      inner->add_keycodes_supported(HUIB_UP); // 0x13 Up
+      inner->add_keycodes_supported(HUIB_DOWN); // 0x14 Down
+      inner->add_keycodes_supported(HUIB_LEFT); // 0x15 Menu again
+      inner->add_keycodes_supported(HUIB_RIGHT); // 0x16 Mic again
+      inner->add_keycodes_supported(HUIB_ENTER); // 0x17 Select
+      inner->add_keycodes_supported(HUIB_MIC); // 0x54 Mic again
+      inner->add_keycodes_supported(HUIB_PLAYPAUSE); // 0x55 Play/Pause
+      inner->add_keycodes_supported(HUIB_NEXT); // 0x57 Next track
+      inner->add_keycodes_supported(HUIB_PREV); // 0x58 Prev Track
       inner->add_keycodes_supported(HUIB_SCROLLWHEEL);
+      // Might as well include these even if we dont use them
+      inner->add_keycodes_supported(HUIB_START); // 0x7E (126) Start media
+      inner->add_keycodes_supported(HUIB_STOP); // 0x7F (127) Stop media
 
       callbacks.CustomizeInputConfig(*inner);
       
@@ -895,6 +899,10 @@
             loge ("Unknown msg_type: %d", msg_type);
             return (0);
         }
+      }
+      else if (chan == AA_CH_BT)
+      {
+        logw("BLUETOOTH CHANNEL MESSAGE = chan %d - msg_type: %d", chan, msg_type);
       }
       else if (chan == AA_CH_AUD || chan == AA_CH_AU1 || chan == AA_CH_AU2 || chan == AA_CH_VID || chan == AA_CH_MIC)
       {

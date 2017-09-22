@@ -293,19 +293,24 @@ enum class HU_INPUT_CHANNEL_MESSAGE : uint16_t
 
 enum HU_INPUT_BUTTON
 {
+    HUIB_MIC1 = 0x01,
+    HUIB_MENU = 0x02,
+    HUIB_HOME = 0x03,
+    HUIB_BACK = 0x04,
+    HUIB_PHONE = 0x05,
+    HUIB_CALLEND = 0x06,
+    //HUIB_NAV = 0x07,
     HUIB_UP = 0x13,
     HUIB_DOWN = 0x14,
     HUIB_LEFT = 0x15,
     HUIB_RIGHT = 0x16,
-    HUIB_BACK = 0x04,
     HUIB_ENTER = 0x17,
     HUIB_MIC = 0x54,
     HUIB_PLAYPAUSE = 0x55,
     HUIB_NEXT = 0x57,
     HUIB_PREV = 0x58,
-    HUIB_PHONE = 0x5,
-    HUIB_START = 126,
-    HUIB_STOP = 127,
+    HUIB_START = 0x7E,
+    HUIB_STOP = 0x7F,
     HUIB_SCROLLWHEEL = 65536,
     
 };
