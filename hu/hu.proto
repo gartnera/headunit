@@ -107,7 +107,7 @@ message SensorEvent
         required int32 fuel_level = 1;
         optional int32 range = 2;
         optional bool low_fuel = 3;
-    } 
+    }
     message DrivingStatus
     {
         enum STATUS
@@ -127,74 +127,74 @@ message SensorEvent
         optional int32 steering_angel = 1;
         optional int32 wheel_speed = 2;
     }
-    message CompassData 
+    message CompassData
     {
         optional int32 bearing_e6 =1;
         optional int32 pitch_e6 =2;
         optional int32 roll_e6 =3;
     }
-    message SpeedData 
+    message SpeedData
     {
         optional int32 speed_e6 =1;
         optional bool cruise_engaged=2;
         optional bool cruise_set_speed=3;
     }
-    message OdometerData 
+    message OdometerData
     {
         optional int32 kms_el = 1;
         optional int32 trip_kms_el = 2;
     }
-    message ParkingBreak 
+    message ParkingBreak
     {
         optional bool parking_breake =1;
     }
-    message Passenger 
+    message Passenger
     {
         optional bool passenger_present =1;
     }
-    message Diagnostics 
+    message Diagnostics
     {
         optional bytes diagnostics_byte = 1;
     }
-    message Environment 
+    message Environment
     {
         optional int32 temperature_e3 =1;
         optional int32 pressure_e3 = 2;
         optional int32 rain = 3;
     }
-    message HVAC 
+    message HVAC
     {
         optional int32 target_temperature_e3 = 1;
         optional int32 current_temperature_e3 = 2;
     }
-    message Accel 
+    message Accel
     {
         optional int32 acceleration_x_e3 = 1;
         optional int32 acceleration_y_e3 = 2;
         optional int32 acceleration_z_e3 = 3;
     }
-    message Gyro 
+    message Gyro
     {
         optional int32 rotation_speed_x_e3 = 1;
         optional int32 rotation_speed_y_e3 = 2;
         optional int32 rotation_speed_z_e3 = 3;
-    }   
-    message Door 
+    }
+    message Door
     {
         optional bool hood_open=1;
         optional bool boot_open=2;
         repeated bool door_open=3;
     }
-    message Light 
+    message Light
     {
-        enum HEADLIGHT_STATE 
+        enum HEADLIGHT_STATE
         {
             HEADLIGHT_STATE_0 = 0;
             HEADLIGHT_STATE_1 = 1;
             HEADLIGHT_STATE_2 = 2;
             HEADLIGHT_STATE_3 = 3;
         }
-        enum TURN_INDICATOR_STATE 
+        enum TURN_INDICATOR_STATE
         {
             TURN_INDICATOR_STATE_0 = 0;
             TURN_INDICATOR_STATE_1 = 1;
@@ -204,11 +204,11 @@ message SensorEvent
         optional HEADLIGHT_STATE headlight = 1;
         optional TURN_INDICATOR_STATE turn_indicator = 2;
         optional bool hazard_light_on = 3;
-    
+
     }
-    message GearData 
+    message GearData
     {
-        enum GEAR 
+        enum GEAR
         {
             GEAR_DRIVE = 100; // 0x64
             GEAR_EIGHTH = 8; // 0x8
@@ -287,7 +287,7 @@ enum AUDIO_TYPE
 enum STREAM_TYPE
 {
     STREAM_TYPE_AUDIO = 1;
-    STREAM_TYPE_VIDEO = 3;   
+    STREAM_TYPE_VIDEO = 3;
 }
 
 message AudioCofig
@@ -365,7 +365,7 @@ message ChannelDescriptor
 
     optional InputStreamChannel input_stream_channel = 5;
 
-    message BluetoothService 
+    message BluetoothService
     {
         enum BluetoothPairingMethod
         {
@@ -379,7 +379,7 @@ message ChannelDescriptor
     }
     optional BluetoothService bluetooth_service = 6;
 
-    message NavigationStatusService 
+    message NavigationStatusService
     {
         message ImageOptions
         {
@@ -438,7 +438,7 @@ message ServiceDiscoveryResponse
 message ChannelOpenRequest
 {
     optional int32 priority = 1;
-    optional int32 id = 2;    
+    optional int32 id = 2;
 }
 
 message ChannelOpenResponse
@@ -462,12 +462,12 @@ message ShutdownRequest
     {
         REASON_QUIT = 1;
     }
-    optional REASON reason = 1; 
+    optional REASON reason = 1;
 }
 
 message ShutdownResponse
 {
-    
+
 }
 
 
@@ -491,7 +491,7 @@ message MediaSetupResponse
 
 message MediaStopRequest
 {
-    
+
 }
 
 message MediaStartRequest
@@ -542,7 +542,7 @@ message VideoFocusRequest
 message VideoFocus
 {
     optional VIDEO_FOCUS_MODE mode = 1;
-    optional bool unrequested = 2; 
+    optional bool unrequested = 2;
 }
 
 
@@ -574,7 +574,7 @@ message VoiceSessionRequest
         VOICE_STATUS_START = 1;
         VOICE_STATUS_STOP = 2;
     }
-    optional VOICE_STATUS voice_status = 1; 
+    optional VOICE_STATUS voice_status = 1;
 }
 
 message AudioFocusRequest

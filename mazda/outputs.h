@@ -41,5 +41,3 @@ public:
 
     void MediaPacket(uint64_t timestamp, const byte * buf, int len);
 };
-
-

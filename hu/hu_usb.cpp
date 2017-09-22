@@ -1,8 +1,5 @@
-
-//
-
 #define LOGTAG "hu_usb"
-#include "hu_uti.h"                                                  // Utilities
+#include "hu_uti.h"  // Utilities
 #include "hu_usb.h"
 #include <vector>
 #include <algorithm>
@@ -59,38 +56,38 @@ struct usbvpid {
 
 const char * iusb_error_get (int error) {
   #if CMU
-   switch (error) 
-      { 
-      case LIBUSB_SUCCESS: 
-              return "Success"; 
-      case LIBUSB_ERROR_IO: 
-              return "Input/output error"; 
-      case LIBUSB_ERROR_INVALID_PARAM: 
-              return "Invalid parameter"; 
-      case LIBUSB_ERROR_ACCESS: 
-              return "Access denied (insufficient permissions)"; 
-      case LIBUSB_ERROR_NO_DEVICE: 
-              return "No such device (it may have been disconnected)"; 
-      case LIBUSB_ERROR_NOT_FOUND: 
-              return "Entity not found"; 
-      case LIBUSB_ERROR_BUSY: 
-              return "Resource busy"; 
-      case LIBUSB_ERROR_TIMEOUT: 
-              return "Operation timed out"; 
-      case LIBUSB_ERROR_OVERFLOW: 
-              return "Overflow"; 
-      case LIBUSB_ERROR_PIPE: 
-              return "Pipe error"; 
-      case LIBUSB_ERROR_INTERRUPTED: 
-              return "System call interrupted (perhaps due to signal)"; 
-      case LIBUSB_ERROR_NO_MEM: 
-              return "Insufficient memory"; 
-      case LIBUSB_ERROR_NOT_SUPPORTED: 
-              return "Operation not supported or unimplemented on this platform"; 
-      case LIBUSB_ERROR_OTHER: 
-              return "Other error"; 
-      } 
-      return "Unknown error"; 
+   switch (error)
+      {
+      case LIBUSB_SUCCESS:
+              return "Success";
+      case LIBUSB_ERROR_IO:
+              return "Input/output error";
+      case LIBUSB_ERROR_INVALID_PARAM:
+              return "Invalid parameter";
+      case LIBUSB_ERROR_ACCESS:
+              return "Access denied (insufficient permissions)";
+      case LIBUSB_ERROR_NO_DEVICE:
+              return "No such device (it may have been disconnected)";
+      case LIBUSB_ERROR_NOT_FOUND:
+              return "Entity not found";
+      case LIBUSB_ERROR_BUSY:
+              return "Resource busy";
+      case LIBUSB_ERROR_TIMEOUT:
+              return "Operation timed out";
+      case LIBUSB_ERROR_OVERFLOW:
+              return "Overflow";
+      case LIBUSB_ERROR_PIPE:
+              return "Pipe error";
+      case LIBUSB_ERROR_INTERRUPTED:
+              return "System call interrupted (perhaps due to signal)";
+      case LIBUSB_ERROR_NO_MEM:
+              return "Insufficient memory";
+      case LIBUSB_ERROR_NOT_SUPPORTED:
+              return "Operation not supported or unimplemented on this platform";
+      case LIBUSB_ERROR_OTHER:
+              return "Other error";
+      }
+      return "Unknown error";
   #else
   return libusb_strerror((libusb_error)error);
   #endif
@@ -102,7 +99,7 @@ int HUTransportStreamUSB::Write(const byte * buf, int len, int tmo) {
   memcpy(copy_buf, buf, len);
 
   libusb_transfer *transfer = libusb_alloc_transfer(0);
-  libusb_fill_bulk_transfer(transfer, iusb_dev_hndl, iusb_ep_out, 
+  libusb_fill_bulk_transfer(transfer, iusb_dev_hndl, iusb_ep_out,
     copy_buf, len, &libusb_callback_send_tramp, this, 0);
 
   int iusb_state = libusb_submit_transfer(transfer);
@@ -164,7 +161,7 @@ int HUTransportStreamUSB::Stop() {
   iusb_state = hu_STATE_STOPPIN;
   logd ("  SET: iusb_state: %d (%s)", iusb_state, state_get (iusb_state));
 
-  
+
   close(readfd);
   close(pipe_write_fd);
   readfd = -1;
@@ -266,7 +263,7 @@ void HUTransportStreamUSB::libusb_callback(libusb_transfer *transfer)
     {
       size_t bytesToWrite = transfer->actual_length;
       unsigned char *buffer = transfer->buffer;
-      
+
       ssize_t ret = 0;
       while (bytesToWrite > 0)
       {
@@ -325,7 +322,7 @@ void HUTransportStreamUSB::libusb_callback_send_tramp(libusb_transfer *transfer)
 int HUTransportStreamUSB::start_usb_recv()
 {
     libusb_transfer *transfer = libusb_alloc_transfer(0);
-    libusb_fill_bulk_transfer(transfer, iusb_dev_hndl, iusb_ep_in, 
+    libusb_fill_bulk_transfer(transfer, iusb_dev_hndl, iusb_ep_in,
       recv_temp_buffer.data(), recv_temp_buffer.size(), &libusb_callback_tramp, this, 0);
 
     int iusb_state = libusb_submit_transfer(transfer);
@@ -458,7 +455,7 @@ int HUTransportStreamUSB::Start(bool waitForDevice) {
         if ((iusb_dev_hndl = find_oap_device()) == nullptr)
         {
             logw("Wating for the device to reconnect");
-            //Give it some time to reconnect            
+            //Give it some time to reconnect
             wait_for_device_connection();
         }
     }

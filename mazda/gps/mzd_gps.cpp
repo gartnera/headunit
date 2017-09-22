@@ -48,11 +48,11 @@ void* process_gps(void* arg) {
         last_timestamp = static_cast<uint64_t>(fix.timestamp.getTime());
 
         // epoch timestamp, latitude, longitude, bearing, speed, altitude, accuracy
-        (*callbackPtr)(fix.timestamp.getTime(), 
-                    fix.latitude, 
+        (*callbackPtr)(fix.timestamp.getTime(),
+                    fix.latitude,
                     fix.longitude,
                     fix.travelAngle,
-                    fix.speed, 
+                    fix.speed,
                     fix.altitude,
                     fix.horizontalAccuracy());
     };

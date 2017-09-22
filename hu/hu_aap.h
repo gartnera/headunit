@@ -299,7 +299,7 @@ enum HU_INPUT_BUTTON
     HUIB_BACK = 0x04,
     HUIB_PHONE = 0x05,
     HUIB_CALLEND = 0x06,
-    HUIB_NAV = 0x07,
+    //HUIB_NAV = 0x07,
     HUIB_UP = 0x13,
     HUIB_DOWN = 0x14,
     HUIB_LEFT = 0x15,

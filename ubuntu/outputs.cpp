@@ -348,4 +348,3 @@ void VideoOutput::SendNightMode()
 
     printf("Nightmode: %s\n", nm ? "On" : "Off");
 }
-

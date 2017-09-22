@@ -1,9 +1,8 @@
-
-  // Utilities: Used by many
+// Utilities: Used by many
 
 //#ifndef UTILS_INCLUDED
 
-//  #define UTILS_INCLUDED
+//#define UTILS_INCLUDED
 
 //#define  GENERIC_CLIENT
 
@@ -88,7 +87,7 @@ int hu_log (int prio, const char * tag, const char * func, const char * fmt, ...
 
 
   va_list ap;
-  va_start (ap, fmt); 
+  va_start (ap, fmt);
 #ifdef __ANDROID_API__
   char tag_str [512] = {0};
   snprintf (tag_str, sizeof (tag_str), "%32.32s", func);
@@ -235,11 +234,11 @@ static void print_backtrace(ucontext_t* ucontext)
   int cur_level = 0;
 
   // Unwind frames one by one, going up the frame stack.
-  while (unw_step(&cursor) > 0) 
+  while (unw_step(&cursor) > 0)
   {
     unw_word_t offset, pc;
     unw_get_reg(&cursor, UNW_REG_IP, &pc);
-    if (pc == 0) 
+    if (pc == 0)
     {
       break;
     }
@@ -253,7 +252,7 @@ static void print_backtrace(ucontext_t* ucontext)
 
 
     char sym[4096];
-    if (unw_get_proc_name(&cursor, sym, sizeof(sym), &offset) == 0) 
+    if (unw_get_proc_name(&cursor, sym, sizeof(sym), &offset) == 0)
     {
       const char* sym_name = sym;
       char* demanged_name = nullptr;
@@ -269,15 +268,15 @@ static void print_backtrace(ucontext_t* ucontext)
 
       printf(" (%s+0x%lx)\n", sym_name, offset);
       free(demanged_name);
-    } 
-    else 
+    }
+    else
     {
       printf(" ???\n");
     }
   }
 }
 
-static void crash_handler(int sig, siginfo_t * info, void * ucontext) 
+static void crash_handler(int sig, siginfo_t * info, void * ucontext)
 {
   ucontext_t* context = reinterpret_cast<ucontext_t*>(ucontext);
   // print out all the frames to stderr
@@ -291,7 +290,7 @@ static void crash_handler(int sig, siginfo_t * info, void * ucontext)
   abort();
 }
 
-static void crash_handler_terminate() 
+static void crash_handler_terminate()
 {
     // print out all the frames to stderr
   printf("Error: c++ exception\n");
@@ -321,9 +320,9 @@ void hu_install_crash_handler()
   sigaction(SIGXFSZ, &sigact, nullptr);
   std::set_terminate (crash_handler_terminate);
 }
-int wait_for_device_connection(){  
+int wait_for_device_connection(){
         int ret;
-        
+
         struct udev *udev = udev_new();
         struct udev_device *dev;
         struct udev_monitor *mon;
@@ -334,37 +333,37 @@ int wait_for_device_connection(){
                 loge("udev_monitor_new_from_netlink returned NULL\n");
                 return -2;
         }
-        
+
         ret = udev_monitor_filter_add_match_subsystem_devtype(mon, "usb", "usb_device");
 	if(ret != 0) {
                 loge("udev_monitor_filter_add_match_subsystem_devtype error : %d \n",ret);
                 return -2;
         }
-        
+
 	ret = udev_monitor_enable_receiving(mon);
         if(ret != 0){
                 loge("udev_monitor_enable_receiving error : %d \n",ret);
-                return -2;                
+                return -2;
         }
-        
+
 	fd = udev_monitor_get_fd(mon);
-        
+
 	while (1) {
 		fd_set fds;
 		struct timeval tv;
 		int ret;
-		
+
 		FD_ZERO(&fds);
 		FD_SET(fd, &fds);
 		tv.tv_sec = 0;
 		tv.tv_usec = 0;
-		
+
 		ret = select(fd+1, &fds, NULL, NULL, &tv);
-		
+
 		/* Check if our file descriptor has received data. */
 		if (ret > 0 && FD_ISSET(fd, &fds)) {
 			logv("\nselect() says there should be data\n");
-			
+
 			/* Make the call to receive the device.
 			   select() ensured that this will not block. */
 			dev = udev_monitor_receive_device(mon);
@@ -374,7 +373,7 @@ int wait_for_device_connection(){
                                         udev_device_get_devnode(dev),
                                         udev_device_get_subsystem(dev),
                                         udev_device_get_devtype(dev));
-                                
+
                                 if(strcmp(udev_device_get_action(dev),"add") == 0){
                                         udev_device_unref(dev);
                                         return 0;
@@ -383,7 +382,7 @@ int wait_for_device_connection(){
 			}
 			else {
 				loge("udev_monitor_receive_device error: no new device\n");
-			}					
+			}
 		}
 		usleep(25*1000);
 	}

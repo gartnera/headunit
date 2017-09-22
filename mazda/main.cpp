@@ -39,12 +39,12 @@ __asm__(".symver realpath1,realpath1@GLIBC_2.11.1");
 gst_app_t gst_app;
 IHUAnyThreadInterface* g_hu = nullptr;
 
-static void nightmode_thread_func(std::condition_variable& quitcv, std::mutex& quitmutex) 
+static void nightmode_thread_func(std::condition_variable& quitcv, std::mutex& quitmutex)
 {
     int nightmode = NM_NO_VALUE;
     mzd_nightmode_start();
     while (true)
-    {        
+    {
         int nightmodenow = mzd_is_night_mode_set();
 
         // We send nightmode status periodically, otherwise Google Maps
@@ -61,7 +61,7 @@ static void nightmode_thread_func(std::condition_variable& quitcv, std::mutex& q
                 s.hu_aap_enc_send_message(0, AA_CH_SEN, HU_SENSOR_CHANNEL_MESSAGE::SensorEvent, sensorEvent);
             });
         }
-        
+
         {
             std::unique_lock<std::mutex> lk(quitmutex);
             if (quitcv.wait_for(lk, std::chrono::milliseconds(1000)) == std::cv_status::no_timeout)
@@ -75,7 +75,7 @@ static void nightmode_thread_func(std::condition_variable& quitcv, std::mutex& q
 }
 
 void gps_location_handler(uint64_t timestamp, double lat, double lng, double bearing, double speed, double alt, double accuracy) {
-    logd("[LOC][%" PRIu64 "] - Lat: %f Lng: %f Brng: %f Spd: %f Alt: %f Acc: %f \n", 
+    logd("[LOC][%" PRIu64 "] - Lat: %f Lng: %f Brng: %f Spd: %f Alt: %f Acc: %f \n",
             timestamp, lat, lng, bearing, speed, alt, accuracy);
 
     g_hu->hu_queue_command([timestamp, lat, lng, bearing, speed, alt, accuracy](IHUConnectionThreadInterface& s)
@@ -105,7 +105,7 @@ void gps_location_handler(uint64_t timestamp, double lat, double lng, double bea
 
 
 int main (int argc, char *argv[])
-{    
+{
     //Force line-only buffering so we can see the output during hangs
     setvbuf(stdout, NULL, _IOLBF, 0);
     setvbuf(stderr, NULL, _IOLBF, 0);
@@ -226,4 +226,3 @@ int main (int argc, char *argv[])
 
     return 0;
 }
-

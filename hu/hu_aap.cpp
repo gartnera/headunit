@@ -440,7 +440,7 @@
       inner->add_keycodes_supported(HUIB_BACK); // 0x04 Back
       inner->add_keycodes_supported(HUIB_PHONE); // 0x05 Phone screen
       inner->add_keycodes_supported(HUIB_CALLEND); // 0x06 End call??
-      inner->add_keycodes_supported(HUIB_NAV); // 0x07 This one is not correct
+      //inner->add_keycodes_supported(HUIB_NAV); // 0x07 Nav (This one is not correct)
       inner->add_keycodes_supported(HUIB_UP); // 0x13 Up
       inner->add_keycodes_supported(HUIB_DOWN); // 0x14 Down
       inner->add_keycodes_supported(HUIB_LEFT); // 0x15 Menu again

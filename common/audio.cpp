@@ -135,13 +135,13 @@ void MicInput::MicThreadMain(IHUAnyThreadInterface* threadInterface)
     snd_pcm_t* mic_handle = nullptr;
 
     int err = 0;
-    if ((err = snd_pcm_open(&mic_handle, micDevice.c_str(), SND_PCM_STREAM_CAPTURE,  SND_PCM_NONBLOCK)) < 0) 
+    if ((err = snd_pcm_open(&mic_handle, micDevice.c_str(), SND_PCM_STREAM_CAPTURE,  SND_PCM_NONBLOCK)) < 0)
     {
         loge("Playback open error: %s\n", snd_strerror(err));
         return;
     }
 
-    if ((err = snd_pcm_set_params(mic_handle, SND_PCM_FORMAT_S16_LE, SND_PCM_ACCESS_RW_INTERLEAVED, 1,16000, 1, 250000)) < 0) 
+    if ((err = snd_pcm_set_params(mic_handle, SND_PCM_FORMAT_S16_LE, SND_PCM_ACCESS_RW_INTERLEAVED, 1,16000, 1, 250000)) < 0)
     {   /* 0.25sec */
         loge("Playback open error: %s\n", snd_strerror(err));
         snd_pcm_close(mic_handle);

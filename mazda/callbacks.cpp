@@ -459,5 +459,3 @@ void AudioManagerClient::Notify(const std::string &signalName, const std::string
         }
     }
 }
-
-
