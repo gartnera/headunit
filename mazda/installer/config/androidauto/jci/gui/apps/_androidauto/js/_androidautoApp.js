@@ -169,7 +169,7 @@ function AAlogPoll()
 
 _androidautoApp.prototype._StartContextReady = function ()
 {
-	framework.common.setSbDomainIcon("apps/_androidauto/aa.png");
+    framework.common.setSbDomainIcon("apps/_androidauto/aa.png");
     try
     {
         AAcallCommandServer("GET", "status", function(currentStatus)
