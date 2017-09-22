@@ -1,9 +1,6 @@
-
 #pragma once
 
-
 //#define NDEBUG // Ensure debug stuff
-
 
 #include <stdio.h>
 #include <stdlib.h>

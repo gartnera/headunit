@@ -101,7 +101,7 @@ function additionalAppRouteMmuiMsg(jsObject) {
 			break;
 		default:
 			// do nothing
-			break;	
+			break;
 	}
 
 	this.origRouteMmuiMsg(jsObject);

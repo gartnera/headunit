@@ -155,4 +155,3 @@ std::string DesktopCommandServerCallbacks::GetLogPath() const
     //no log
     return std::string();
 }
-

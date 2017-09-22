@@ -68,7 +68,6 @@ struct TouchScreenState {
     int action_recvd;
 };
 
-
 static void aa_touch_event(HU::TouchInfo::TOUCH_ACTION action, unsigned int x, unsigned int y, uint64_t ts) {
 
     g_hu->hu_queue_command([action, x, y, ts](IHUConnectionThreadInterface& s)

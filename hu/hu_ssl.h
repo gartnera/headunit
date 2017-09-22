@@ -9,7 +9,6 @@
   //SSL_METHOD  * hu_ssl_method  = NULL;
   //SSL_CTX     * hu_ssl_ctx     = NULL;
 
-
   // Internal:
 
 #ifdef  MR_SSL_INTERNAL
@@ -17,7 +16,7 @@
 
   #define cert_buf  hu_ssl_cert_mr_buf
   #define pkey_buf  hu_ssl_pkey_mr_buf
-  
+
    char hu_ssl_cert_mr_buf [] = "-----BEGIN CERTIFICATE-----\n\
 MIIDKjCCAhICARswDQYJKoZIhvcNAQELBQAwWzELMAkGA1UEBhMCVVMxEzARBgNV\n\
 BAgMCkNhbGlmb3JuaWExFjAUBgNVBAcMDU1vdW50YWluIFZpZXcxHzAdBgNVBAoM\n\
@@ -67,4 +66,3 @@ KAwp3tIHPoJOQiKNQ3/qks5km/9dujUGU2ARiU3qmxLMdgegFz8e\n\
 -----END RSA PRIVATE KEY-----\n";
 
 #endif  //#ifdef  MR_SSL_INTERNAL
-

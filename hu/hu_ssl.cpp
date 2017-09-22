@@ -1,4 +1,3 @@
-
   #define MR_SSL_INTERNAL   // For certificate and private key only
   #define LOGTAG "hu_ssl"
   #include "hu_uti.h"
@@ -45,9 +44,9 @@
       case SSL_ERROR_SSL:               err_str = ("Error SSL");             break;
       default:                          err_str = ("Error Unknown");         break;
     }
-	
+
 	ERR_print_errors_fp(stderr);
-	
+
     if (strlen (err_str) == 0)
       logd ("ret: %d  ssl_err: %d (Success)", ret, ssl_err);
     else
@@ -56,7 +55,7 @@
 
   int HUServer::send_ssl_handshake_packet()
   {
-    byte hs_buf [MAX_FRAME_SIZE] = {0}; 
+    byte hs_buf [MAX_FRAME_SIZE] = {0};
 
     int len = BIO_read (hu_ssl_wm_bio, hs_buf, sizeof (hs_buf));         // Read from the BIO Client request: Hello/Key Exchange
     if (len <= 0) {
@@ -69,7 +68,7 @@
     if (ret < 0) {
       loge ("hu_aap_tra_send() HS client req ret: %d  len: %d", ret, len);
       return -1;
-    }      
+    }
 
     return (0);
   }
@@ -87,9 +86,9 @@
       loge ("SSL_library_init() error");
       return (-1);
     }
-    
 
-    
+
+
     SSL_load_error_strings ();                                          // Before or after init ?
     ERR_load_BIO_strings ();
     ERR_load_crypto_strings ();
@@ -125,7 +124,7 @@
     pem_password_cb * ppcb2 = NULL;
     void * u2 = NULL;
       // Read a private key from a BIO using a pass phrase callback:    key = PEM_read_bio_PrivateKey(bp, NULL, pass_cb,  "My Private Key");
-      // Read a private key from a BIO using the pass phrase "hello":   key = PEM_read_bio_PrivateKey(bp, NULL, 0,        "hello"); 
+      // Read a private key from a BIO using the pass phrase "hello":   key = PEM_read_bio_PrivateKey(bp, NULL, 0,        "hello");
     EVP_PKEY * priv_key_ret = NULL;
     EVP_PKEY * priv_key = PEM_read_bio_PrivateKey (pkey_bio, & priv_key_ret, ppcb2, u2);
     if (priv_key == NULL) {
@@ -172,7 +171,7 @@
       return (-1);
     }
     logd ("SSL_new() hu_ssl_ssl: %p", hu_ssl_ssl);
-    
+
 //	SSL_set_mode (hu_ssl_ssl, SSL_OP_NO_TLSv1|SSL_OP_NO_TLSv1_1 |SSL_OP_NO_SSLv2|SSL_OP_NO_SSLv3);
 
     ret = SSL_check_private_key (hu_ssl_ssl);
@@ -205,7 +204,7 @@
     SSL_set_connect_state (hu_ssl_ssl);                                        // Set ssl to work in client mode
 
     SSL_set_verify (hu_ssl_ssl, SSL_VERIFY_NONE, NULL);
-    
+
     ret = SSL_do_handshake (hu_ssl_ssl);                             // Do current handshake step processing
     logw ("SSL_do_handshake() ret: %d", ret);
 
@@ -255,7 +254,7 @@
         loge ("hu_aap_unenc_send_message() ret: %d", ret);
         hu_aap_stop ();
         return (-1);
-      }  
+      }
       hu_ssl_inf_log ();
 
       iaap_state = hu_STATE_STARTED;
@@ -263,4 +262,3 @@
 
       return  0;
   }
-

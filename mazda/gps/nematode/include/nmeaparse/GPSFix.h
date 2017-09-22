@@ -141,7 +141,7 @@ namespace nmea {
 
 		char status;		// Status: A=active, V=void (not locked)
 		uint8_t type;		// Type: 1=none, 2=2d, 3=3d
-		uint8_t quality;	// Quality: 
+		uint8_t quality;	// Quality:
 							//    0 = invalid
 							//    1 = GPS fix (SPS)
 							//    2 = DGPS fix
@@ -166,7 +166,7 @@ namespace nmea {
 		double horizontalAccuracy();
 		double verticalAccuracy();
 		bool hasEstimate();
-		
+
 		std::chrono::seconds timeSinceLastUpdate();	// Returns seconds difference from last timestamp and right now.
 
 		std::string toString();

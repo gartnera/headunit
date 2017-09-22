@@ -56,7 +56,6 @@ public:
     virtual void ReplaceFavoriteWithCurrentDestination(const uint32_t& iD) override {}
     virtual void AddFavorite(const std::string& name, const std::string& countryName, const std::string& stateName, const std::string& cityName, const std::string& streetName, const std::string& zipCode, const double& latitude, const double& longitude) override {}
     virtual void ReplaceFavoriteWithAddress(const uint32_t& iD, const std::string& name, const std::string& countryName, const std::string& stateName, const std::string& cityName, const std::string& streetName, const std::string& zipCode, const double& latitude, const double& longitude) override {}
-
 };
 
 

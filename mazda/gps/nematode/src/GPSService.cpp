@@ -352,7 +352,7 @@ void GPSService::read_GPGSV(const NMEASentence& nmea){
 
 		this->fix.almanac.processedPages++;
 
-		// 
+		//
 		if (this->fix.visibleSatellites == 0){
 			this->fix.almanac.clear();
 		}
@@ -506,4 +506,3 @@ void GPSService::read_GPVTG(const NMEASentence& nmea){
 		throw pe;
 	}
 }
-

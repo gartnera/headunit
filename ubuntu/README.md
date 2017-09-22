@@ -1,4 +1,4 @@
-The following instructions only tested on ubuntu 16.04 and 16.10 x64, however should be working on most distros with up-to-date 
+The following instructions only tested on ubuntu 16.04 and 16.10 x64, however should be working on most distros with up-to-date
 
 # How to run headunit
 Install dependencies:

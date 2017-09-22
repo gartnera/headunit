@@ -1,12 +1,8 @@
-
-  //
-
   #define LOGTAG "hu_tcp"
   #include "hu_uti.h"                                                  // Utilities
   #include "hu_tcp.h"
 
   int itcp_state = 0; // 0: Initial    1: Startin    2: Started    3: Stoppin    4: Stopped
-
 
   #include <sys/types.h>
   #include <sys/time.h>
@@ -18,7 +14,7 @@
   #include <netinet/tcp.h>
 
   #include <netinet/in.h>
-  #include <netdb.h> 
+  #include <netdb.h>
 
   HUTransportStreamTCP::~HUTransportStreamTCP()
   {
@@ -170,7 +166,7 @@
           loge ("Error listen  errno: %d (%s)", errno, strerror (errno));
           return (-4);
         }
-      
+
         logd ("itcp_init Ready");
     }
 
@@ -222,4 +218,3 @@
     logd ("  SET: itcp_state: %d (%s)", itcp_state, state_get (itcp_state));
     return (0);
   }
-
