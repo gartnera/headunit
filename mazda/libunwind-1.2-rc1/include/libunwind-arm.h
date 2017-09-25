@@ -42,7 +42,7 @@ extern "C" {
    require recompiling all users of this library.  Stack allocation is
    relatively cheap and unwind-state copying is relatively rare, so we
    want to err on making it rather too big than too small.  */
-   
+
 /* FIXME for ARM. Too big?  What do other things use for similar tasks?  */
 #define UNW_TDEP_CURSOR_LEN     4096
 
@@ -69,7 +69,7 @@ typedef enum
     UNW_ARM_R13,
     UNW_ARM_R14,
     UNW_ARM_R15,
-    
+
     /* VFPv2 s0-s31 (obsolescent numberings).  */
     UNW_ARM_S0 = 64,
     UNW_ARM_S1,
@@ -103,7 +103,7 @@ typedef enum
     UNW_ARM_S29,
     UNW_ARM_S30,
     UNW_ARM_S31,
-    
+
     /* FPA register numberings.  */
     UNW_ARM_F0 = 96,
     UNW_ARM_F1,
@@ -113,7 +113,7 @@ typedef enum
     UNW_ARM_F5,
     UNW_ARM_F6,
     UNW_ARM_F7,
-    
+
     /* iWMMXt GR register numberings.  */
     UNW_ARM_wCGR0 = 104,
     UNW_ARM_wCGR1,
@@ -123,7 +123,7 @@ typedef enum
     UNW_ARM_wCGR5,
     UNW_ARM_wCGR6,
     UNW_ARM_wCGR7,
-    
+
     /* iWMMXt register numberings.  */
     UNW_ARM_wR0 = 112,
     UNW_ARM_wR1,
@@ -141,9 +141,9 @@ typedef enum
     UNW_ARM_wR13,
     UNW_ARM_wR14,
     UNW_ARM_wR15,
-    
+
     /* Two-byte encodings from here on.  */
-    
+
     /* SPSR.  */
     UNW_ARM_SPSR = 128,
     UNW_ARM_SPSR_FIQ,
@@ -151,7 +151,7 @@ typedef enum
     UNW_ARM_SPSR_ABT,
     UNW_ARM_SPSR_UND,
     UNW_ARM_SPSR_SVC,
-    
+
     /* User mode registers.  */
     UNW_ARM_R8_USR = 144,
     UNW_ARM_R9_USR,
@@ -160,7 +160,7 @@ typedef enum
     UNW_ARM_R12_USR,
     UNW_ARM_R13_USR,
     UNW_ARM_R14_USR,
-    
+
     /* FIQ registers.  */
     UNW_ARM_R8_FIQ = 151,
     UNW_ARM_R9_FIQ,
@@ -169,23 +169,23 @@ typedef enum
     UNW_ARM_R12_FIQ,
     UNW_ARM_R13_FIQ,
     UNW_ARM_R14_FIQ,
-    
+
     /* IRQ registers.  */
     UNW_ARM_R13_IRQ = 158,
     UNW_ARM_R14_IRQ,
-    
+
     /* ABT registers.  */
     UNW_ARM_R13_ABT = 160,
     UNW_ARM_R14_ABT,
-    
+
     /* UND registers.  */
     UNW_ARM_R13_UND = 162,
     UNW_ARM_R14_UND,
-    
+
     /* SVC registers.  */
     UNW_ARM_R13_SVC = 164,
     UNW_ARM_R14_SVC,
-    
+
     /* iWMMXt control registers.  */
     UNW_ARM_wC0 = 192,
     UNW_ARM_wC1,

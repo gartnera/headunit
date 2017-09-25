@@ -221,11 +221,11 @@ GPSFix::GPSFix() {
 
 	haslock = 0;
 
-	dilution = 0;		
+	dilution = 0;
 	horizontalDilution = 0;		// Horizontal - Best is 1, >20 is terrible, so 0 means uninitialized
-	verticalDilution = 0;	
-	latitude = 0;	
-	longitude = 0;	
+	verticalDilution = 0;
+	latitude = 0;
+	longitude = 0;
 	speed = 0;
 	travelAngle = 0;
 	altitude = 0;
@@ -322,7 +322,7 @@ std::string GPSFix::travelAngleToCompassDirection(double deg, bool abbrev){
 		};
 		return dirs[r];
 	}
-	
+
 };
 
 
@@ -407,6 +407,3 @@ std::string GPSFix::toString(){
 GPSFix::operator std::string(){
 	return toString();
 }
-
-
-

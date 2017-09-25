@@ -75,10 +75,3 @@ for root, dirnames, filenames in os.walk(startDir):
 prettyString = outputNode.toprettyxml();
 with open(sys.argv[2], "w") as o:
     o.write(prettyString)
-
-
-
-
-                
-    
-

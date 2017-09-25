@@ -1,13 +1,6 @@
 #include <glib.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <gst/gst.h>
-#include <gst/app/gstappsrc.h>
-#include <time.h>
-#include <signal.h>
-#include <errno.h>
-#include <dbus/dbus.h>
-#include <poll.h>
 #include <inttypes.h>
 #include <cmath>
 #include <functional>
@@ -25,7 +18,6 @@
 #include "nm/mzd_nightmode.h"
 #include "gps/mzd_gps.h"
 
-#include "audio.h"
 #include "main.h"
 #include "command_server.h"
 #include "callbacks.h"

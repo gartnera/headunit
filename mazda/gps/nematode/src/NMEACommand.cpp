@@ -45,7 +45,7 @@ string NMEACommand::addChecksum(std::string s){
 		 Protocol	0 			0=SiRF binary, 1=NMEA
 		 Baud 		9600 		1200, 2400, 4800, 9600, 19200, 38400, 57600, and 115200
 		 DataBits	8 			8,71
-		
+
 		 StopBits	1 			0,1		1. SiRF protocol is only valid for 8 data bits, 1stop bit, and no parity.
 		 Parity		0 			0=None, 1=Odd, 2=Even
 		 Checksum	*0C
@@ -105,4 +105,3 @@ std::string NMEACommandQueryRate::toString(){
 
 	return NMEACommand::addChecksum(message);
 }
-

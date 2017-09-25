@@ -4,6 +4,7 @@
 #include "audio.h"
 #include "main.h"
 #include "bt/mzd_bluetooth.h"
+#include <dbus/dbus-protocol.h>
 
 #include "json/json.hpp"
 using json = nlohmann::json;
@@ -142,14 +143,34 @@ void MazdaEventCallbacks::AudioFocusHappend(int chan, bool hasFocus) {
     logd("Sent channel %i HU_PROTOCOL_MESSAGE::AudioFocusResponse %s\n", chan,  HU::AudioFocusResponse::AUDIO_FOCUS_STATE_Name(response.focus_type()).c_str());
 }
 
+class SetRequiredSurfacesHandler : public DBus::Callback_Base<bool, const DBus::Message&> {
+    VideoManagerClient *videoManagerClient;
+
+public:
+    SetRequiredSurfacesHandler(VideoManagerClient *ptr) : videoManagerClient(ptr) {}
+
+    bool call(const DBus::Message& param) const override {
+        DBus::MessageIter ri = param.reader();
+        std::string surfaces;
+        ri >> surfaces;
+        int16_t bFadeOpera;
+        ri >> bFadeOpera;
+        return videoManagerClient->requiredSurfacesCallback(surfaces, bFadeOpera);
+    }
+};
+
 VideoManagerClient::VideoManagerClient(MazdaEventCallbacks& callbacks, DBus::Connection& hmiBus)
-        : DBus::ObjectProxy(hmiBus, "/com/jci/bucpsa", "com.jci.bucpsa"), guiClient(hmiBus), callbacks(callbacks)
+        : DBus::ObjectProxy(hmiBus, "/com/jci/bucpsa", "com.jci.bucpsa"), guiClient(hmiBus), bthfClient(*this, hmiBus), callbacks(callbacks)
 {
     uint32_t currentDisplayMode;
     int32_t returnValue;
     // check if backup camera is not visible at the moment and get output only when not
     GetDisplayMode(currentDisplayMode, returnValue);
     allowedToGetFocus = !(bool)currentDisplayMode;
+    hmiBus.add_match("type='method_call',path='/com/jci/nativeguictrl',member='SetRequiredSurfaces'");
+    DBus::MessageSlot slot;
+    slot = new SetRequiredSurfacesHandler(this);
+    hmiBus.add_filter(slot);
 }
 
 VideoManagerClient::~VideoManagerClient() {
@@ -216,9 +237,12 @@ void VideoManagerClient::DisplayMode(const uint32_t &currentDisplayMode)
     }
 }
 
-MazdaCommandServerCallbacks::MazdaCommandServerCallbacks()
-{
-
+bool VideoManagerClient::requiredSurfacesCallback(const std::string &surfaces, const int16_t &bFadeOpera) {
+    // handle callback
+    std::stringstream surfacesDebug;
+    std::copy(surfaces.begin(), surfaces.end(), std::ostream_iterator<int>(surfacesDebug, " "));
+    logd("CMU switches surfaces: %s", surfacesDebug.str().c_str());
+    return true;
 }
 
 bool MazdaCommandServerCallbacks::IsConnected() const
@@ -457,5 +481,15 @@ void AudioManagerClient::Notify(const std::string &signalName, const std::string
         {
             loge("Failed to parse state json: %s", ex.what());
         }
+    }
+}
+
+void BTHFClient::CallStatus(const uint32_t &bthfstate, const uint32_t &call1status, const uint32_t &call2status,
+                            const ::DBus::Struct<std::vector<uint8_t> > &call1Number,
+                            const ::DBus::Struct<std::vector<uint8_t> > &call2Number) {
+    if ((bool)bthfstate) {
+        videoMgrClient.releaseVideoFocus(VIDEO_FOCUS_REQUESTOR::BTHF);
+    } else {
+        videoMgrClient.requestVideoFocus(VIDEO_FOCUS_REQUESTOR::BTHF);
     }
 }
