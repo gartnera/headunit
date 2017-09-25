@@ -58,6 +58,32 @@ public:
     }
 };
 
+class BTHFClient : public com::jci::bthf_proxy,
+                   public DBus::ObjectProxy {
+    VideoManagerClient& videoMgrClient;
+
+public:
+    BTHFClient(VideoManagerClient &videoMgrClient, DBus::Connection &connection)
+            : DBus::ObjectProxy(connection, "/com/jci/bthf", "com.jci.bthf"), videoMgrClient(videoMgrClient)
+    {
+    }
+    virtual void CallStatus(const uint32_t& bthfstate, const uint32_t& call1status, const uint32_t& call2status, const ::DBus::Struct< std::vector< uint8_t > >& call1Number, const ::DBus::Struct< std::vector< uint8_t > >& call2Number) override;
+    virtual void BatteryIndicator(const uint32_t& minValue, const uint32_t& maxValue, const uint32_t& currentValue) override {}
+    virtual void SignalStrength(const uint32_t& minValue, const uint32_t& maxValue, const uint32_t& currentValue) override {}
+    virtual void RoamIndicator(const uint32_t& value) override {}
+    virtual void NewServiceIndicator(const bool& value) override {}
+    virtual void PhoneChargeIndicator(const uint32_t& value) override {}
+    virtual void SmsPresentIndicator(const bool& value) override {}
+    virtual void VoiceMailIndicator(const bool& value) override {}
+    virtual void LowBatteryIndicator(const bool& value) override {}
+    virtual void BthfReadyStatus(const uint32_t& hftReady, const uint32_t& reasonCode) override {}
+    virtual void BthfBusyReason(const uint32_t& busyReason) override {}
+    virtual void MicStatus(const bool& isMicMuted) override {}
+    virtual void BargeinStatus(const bool& isBargeinActive) override {}
+    virtual void BthfSettingsResponse(const ::DBus::Struct< std::vector< uint8_t > >& callsettings) override {}
+    virtual void FailureReasonCodes(const uint32_t& errorType) override {}
+};
+
 class AudioManagerClient : public com::xsembedded::ServiceProvider_proxy,
                      public DBus::ObjectProxy
 {
@@ -88,7 +114,8 @@ public:
 enum class VIDEO_FOCUS_REQUESTOR : u_int8_t {
     HEADUNIT, // headunit (we) has requested video focus
     ANDROID_AUTO, // AA phone app has requested video focus
-    BACKUP_CAMERA // CMU requested screen for backup camera
+    BACKUP_CAMERA, // CMU requested screen for backup camera
+    BTHF // CMU requested screen for Call app
 };
 
 class VideoManagerClient : public com::jci::bucpsa_proxy,
@@ -98,12 +125,15 @@ class VideoManagerClient : public com::jci::bucpsa_proxy,
 
     MazdaEventCallbacks& callbacks;
     NativeGUICtrlClient guiClient;
+    BTHFClient bthfClient;
 public:
     VideoManagerClient(MazdaEventCallbacks& callbacks, DBus::Connection &hmiBus);
     ~VideoManagerClient();
 
     void requestVideoFocus(VIDEO_FOCUS_REQUESTOR requestor);
     void releaseVideoFocus(VIDEO_FOCUS_REQUESTOR requestor);
+
+    bool requiredSurfacesCallback(const std::string &surfaces, const int16_t &bFadeOpera);
 
     virtual void CommandResponse(const uint32_t& cmdResponse) override {}
     virtual void DisplayMode(const uint32_t& currentDisplayMode) override;
@@ -150,7 +180,7 @@ public:
 class MazdaCommandServerCallbacks : public ICommandServerCallbacks
 {
 public:
-    MazdaCommandServerCallbacks();
+    MazdaCommandServerCallbacks() = default;
 
     MazdaEventCallbacks* eventCallbacks = nullptr;
 
