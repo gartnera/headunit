@@ -96,6 +96,78 @@ function AAdisplayError(location, err)
     }
 }
 
+function AAStartCall ()
+{
+  // The monitor checks every 1.5 seconds and upon being aware of the change,  timeout for 1 second then calls the surface change
+  // this gives plenty of time for the context change to complete. This means a Min 1s - Max 2.5s flash of the MZD call screen
+  var callStartMonitor = window.setInterval(function ()
+  {
+    if (framework.getCurrentApp() == 'phone' && framework.getCurrCtxtId() == 'ActiveCall' || framework.getCurrCtxtId() == 'IncomingCall')
+    {
+      AAcallCommandServer("GET", "status", function(currentStatus)
+      {
+        if (currentStatus != null && currentStatus.connected)
+        {
+          var takeFocus = function()
+          {
+            utility.setRequiredSurfaces(['TV_TOUCH_SURFACE'], true);
+            // Accepting the call will take video focus again so we only clearInterval when the call is active
+            if(framework.getCurrCtxtId() !== 'IncomingCall')
+            {
+              // kill this it will restart after the call ends
+              window.clearInterval(callStartMonitor);
+              // start waiting for call to end
+              AAEndCall();
+            }
+          };
+          // need to sleep a bit to make sure the context change has completed
+          window.setTimeout(takeFocus, 1000);
+        }
+        else
+        {
+          // Headunit and/or phone disconnected reset to Opera Surface and kill the monitor
+          window.clearInterval(callStartMonitor);
+          utility.setRequiredSurfaces(['OPERA_SURFACE'], true);
+          AAdisplayError("AAStartCall Error: Headunit and/or Phone Disconnected");
+        }
+      });
+    }
+  }, 1500);
+}
+
+function AAEndCall ()
+{
+  var callEndMonitor = window.setInterval(function ()
+  {
+    // Leaving the ActiveCall context
+    if (framework.getCurrentApp() !== 'phone' && framework.getCurrCtxtId() !== 'ActiveCall')
+    {
+      AAcallCommandServer("GET", "status", function(currentStatus)
+      {
+        if (currentStatus != null && currentStatus.connected)
+        {
+          var takeFocus = function()
+          {
+            utility.setRequiredSurfaces(['TV_TOUCH_SURFACE'], true);
+            window.clearInterval(callEndMonitor);
+            // Start watching for next call to start
+            AAStartCall();
+          };
+          // Need to wait a bit to make sure the context change has completed
+          window.setTimeout(takeFocus, 1000);
+        }
+        else
+        {
+          // Headunit and/or phone disconnected reset to Opera Surface
+          window.clearInterval(callEndMonitor);
+          utility.setRequiredSurfaces(['OPERA_SURFACE'], true);
+          AAdisplayError("AAEndCall Error: Headunit and/or Phone Disconnected");
+        }
+      });
+    }
+  }, 1500);
+}
+
 function AAlogPoll()
 {
 
@@ -197,6 +269,7 @@ _androidautoApp.prototype._StartContextReady = function ()
     {
         AAdisplayError("_StartContextReady", err);
     }
+    AAStartCall();
 };
 
 _androidautoApp.prototype._StartContextOut = function ()
