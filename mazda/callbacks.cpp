@@ -17,7 +17,7 @@ MazdaEventCallbacks::MazdaEventCallbacks(DBus::Connection& serviceBus, DBus::Con
     , audioFocus(false)
 {
     //no need to create/destroy this
-    audioOutput.reset(new AudioOutput("entertainmentUsb", true));
+    audioOutput.reset(new AudioOutput("entertainmentUsb", false));
     audioMgrClient.reset(new AudioManagerClient(*this, serviceBus));
     videoMgrClient.reset(new VideoManagerClient(*this, hmiBus));
 }
