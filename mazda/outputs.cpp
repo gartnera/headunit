@@ -6,9 +6,11 @@
 using json = nlohmann::json;
 
 #include <linux/input.h>
+#include <linux/uinput.h>
 
 #define EVENT_DEVICE_TS	"/dev/input/filtered-touchscreen0"
 #define EVENT_DEVICE_KBD "/dev/input/filtered-keyboard0"
+#define EVENT_DEVICE_UI "/dev/uinput"
 
 static gboolean bus_callback(GstBus *bus, GstMessage *message, gpointer *ptr)
 {
@@ -94,7 +96,35 @@ static uint64_t get_timestamp(struct input_event& ii)
 {
     return ii.time.tv_sec * 1000000 + ii.time.tv_usec;
 }
+void emit(int fd, int type, int code, int val)
+{
+  struct input_event ie;
+  ie.type = type;
+  ie.code = code;
+  ie.value = val;
+  ie.time.tv_sec = 0; //TODO: figure out holding down keys for radio ctrl
+  ie.time.tv_usec = 0;
+  write(fd, &ie, sizeof(ie));
+}
+/**
+* Passes the keystroke to MZD by "ungrabbing" the kbd on key-down, simulating the same keystroke with uinput,
+* then "re-grabbing" the kbd on key-up. 
+*/
+void pass_key_to_mzd(int kbd_fd, int ui_fd, int type, int code, int val, int pressed)
+{
+  if (pressed && ioctl(kbd_fd, EVIOCGRAB, 0) < 0)
+  {
+    fprintf(stderr, "EVIOCGRAB failed to release %s\n", EVENT_DEVICE_KBD);
+  }
 
+  emit(ui_fd, type, code, val);
+  emit(ui_fd, EV_SYN, SYN_REPORT, 0);
+
+  if(!pressed && ioctl(kbd_fd, EVIOCGRAB, 1) < 0)
+  {
+    fprintf(stderr, "EVIOCGRAB failed to grab %s\n", EVENT_DEVICE_KBD);
+  }
+}
 void VideoOutput::input_thread_func()
 {
     TouchScreenState mTouch {0,0,(HU::TouchInfo::TOUCH_ACTION)0,0};
@@ -107,6 +137,7 @@ void VideoOutput::input_thread_func()
         FD_ZERO(&set);
         FD_SET(touch_fd, &set);
         FD_SET(kbd_fd, &set);
+        FD_SET(ui_fd, &set);
         FD_SET(input_thread_quit_pipe_read, &set);
 
         unblocked = select(maxfdPlus1, &set, NULL, NULL, NULL);
@@ -205,6 +236,7 @@ void VideoOutput::input_thread_func()
                     uint32_t scanCode = 0;
                     int32_t scrollAmount = 0;
                     bool isPressed = (event.value == 1);
+                    bool hasAudioFocus = callbacks->audioFocus;
 
                     printf("Key code %i value %i\n", (int)event.code, (int)event.value);
                     switch (event.code)
@@ -220,11 +252,25 @@ void VideoOutput::input_thread_func()
                         break;
                     case KEY_LEFTBRACE:
                         printf("KEY_LEFTBRACE\n");
-                        scanCode = HUIB_NEXT;
+                        if(hasAudioFocus)
+                        {
+                          scanCode = HUIB_NEXT;
+                        }
+                        else
+                        {
+                          pass_key_to_mzd(kbd_fd, ui_fd, event.type, event.code, event.value, isPressed);
+                        }
                         break;
                     case KEY_RIGHTBRACE:
                         printf("KEY_RIGHTBRACE\n");
-                        scanCode = HUIB_PREV;
+                        if(hasAudioFocus)
+                        {
+                          scanCode = HUIB_PREV;
+                        }
+                        else
+                        {
+                          pass_key_to_mzd(kbd_fd, ui_fd, event.type, event.code, event.value, isPressed);
+                        }
                         break;
                     case KEY_BACKSPACE:
                         printf("KEY_BACKSPACE\n");
@@ -279,12 +325,20 @@ void VideoOutput::input_thread_func()
                         break;
                     case KEY_X: // CALL END
                         printf("KEY_X\n");
-                        scanCode = HUIB_CALLEND;
+                        if(hasAudioFocus && isPressed && ioctl(kbd_fd, EVIOCGRAB, 0) < 0)
+                        { // This is just for testing although it may be a useful feature if we polish it a little
+                          fprintf(stderr, "EVIOCGRAB failed to ungrab %s\n", EVENT_DEVICE_KBD);
+                        }
+                        else
+                        { // we can do this since this button does nothing when not on a call
+                          scanCode = HUIB_CALLEND;
+                        }
                         break;
                     case KEY_T: // FAV
                         printf("KEY_T\n");
-                        if (isPressed) {
-                          callbacks->takeVideoFocus();
+                        if (hasAudioFocus && isPressed) // we could give this button different actions for different scenerios
+                        { // this is for testing
+                          callbacks->releaseAudioFocus();
                         }
                         break;
                     }
@@ -336,13 +390,51 @@ VideoOutput::VideoOutput(MazdaEventCallbacks* callbacks)
 
     kbd_fd = open(EVENT_DEVICE_KBD, O_RDONLY);
 
-    if (kbd_fd < 0) {
+    if (kbd_fd < 0)
+    {
         fprintf(stderr, "%s is not a vaild device\n", EVENT_DEVICE_KBD);
     }
 
     if (ioctl(kbd_fd, EVIOCGRAB, 1) < 0)
     {
-        fprintf(stderr, "EVIOCGRAB failed on %s\n", EVENT_DEVICE_TS);
+        fprintf(stderr, "EVIOCGRAB failed on %s\n", EVENT_DEVICE_KBD);
+    }
+
+    ui_fd = open(EVENT_DEVICE_UI, O_WRONLY | O_NONBLOCK);
+
+    if (ui_fd < 0)
+    {
+        fprintf(stderr, "%s is not a vaild device\n", EVENT_DEVICE_UI);
+    }
+
+    if (ioctl(ui_fd, UI_SET_EVBIT, EV_KEY) < 0)
+    {
+        fprintf(stderr, "UI_SET_EVBIT failed on %s\n", EV_KEY);
+    }
+    if (ioctl(ui_fd, UI_SET_KEYBIT, KEY_LEFTBRACE) < 0)
+    {
+        fprintf(stderr, "UI_SET_KEYBIT failed on %s\n", KEY_LEFTBRACE);
+    }
+    if (ioctl(ui_fd, UI_SET_KEYBIT, KEY_RIGHTBRACE) < 0)
+    {
+        fprintf(stderr, "UI_SET_KEYBIT failed on %s\n", KEY_RIGHTBRACE);
+    }
+    struct uinput_user_dev uidev;
+    memset(&uidev, 0, sizeof(uidev));
+    snprintf(uidev.name, UINPUT_MAX_NAME_SIZE, "mzd-uinput");
+    uidev.id.bustype = BUS_USB;
+    uidev.id.vendor  = 0x1;
+    uidev.id.product = 0x1;
+    uidev.id.version = 1;
+
+    if(write(ui_fd, &uidev, sizeof(uidev)) < 0)
+    {
+        fprintf(stderr, "Write uidev failed");
+    }
+
+    if (ioctl(ui_fd, UI_DEV_CREATE) < 0)
+    {
+        fprintf(stderr, "UI_DEV_CREATE failed on %s\n", EVENT_DEVICE_UI);
     }
 
     int quitpiperw[2];
@@ -393,6 +485,8 @@ VideoOutput::~VideoOutput()
     printf("waiting for input_thread\n");
     input_thread.join();
 
+    ioctl(ui_fd, UI_DEV_DESTROY);
+    close(ui_fd);
     close(touch_fd);
     close(kbd_fd);
     close(input_thread_quit_pipe_write);

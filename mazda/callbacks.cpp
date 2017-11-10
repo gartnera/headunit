@@ -78,6 +78,9 @@ void MazdaEventCallbacks::CustomizeOutputChannel(int chan, HU::ChannelDescriptor
 #endif
 }
 
+void MazdaEventCallbacks::releaseAudioFocus()  {
+  audioMgrClient->audioMgrReleaseAudioFocus(0);
+}
 void MazdaEventCallbacks::AudioFocusRequest(int chan, const HU::AudioFocusRequest &request)  {
 
     run_on_main_thread([this, chan, request](){
@@ -381,6 +384,7 @@ void AudioManagerClient::audioMgrReleaseAudioFocus(int chan)
     bool hadFocus = channelsWithFocus.size() > 0;
     channelsWithFocus.erase(chan);
     channelsWaitingForFocus.erase(chan);
+    callbacks.audioFocus = false;
 
     if (previousSessionID >= 0 && hadFocus && channelsWithFocus.size() == 0)
     {
@@ -425,7 +429,7 @@ void AudioManagerClient::Notify(const std::string &signalName, const std::string
 
                 if (eventSessionID == usbSessionID)
                 {
-                    bool hasFocus = newFocus != "lost";
+                    bool hasFocus = newFocus == "gained";
                     callbacks.audioFocus = hasFocus;
                     if (hasFocus)
                     {

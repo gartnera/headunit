@@ -138,6 +138,7 @@ public:
 
     void takeVideoFocus();
     void releaseVideoFocus();
+    void releaseAudioFocus();
 
     void VideoFocusHappened(bool hasFocus, bool unrequested);
     void AudioFocusHappend(int chan, bool hasFocus);

@@ -32,7 +32,7 @@ class VideoOutput {
     std::thread input_thread;
     int input_thread_quit_pipe_read = -1;
     int input_thread_quit_pipe_write = -1;
-    int touch_fd = -1, kbd_fd = -1;
+    int touch_fd = -1, kbd_fd = -1, ui_fd = -1;
     void input_thread_func();
 
 public:

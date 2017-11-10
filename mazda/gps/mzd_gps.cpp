@@ -44,7 +44,7 @@ void* process_gps(void* arg) {
         if (fix.latitude == 0 && fix.longitude == 0) return;    // Sometimes we get zero here, ignore it then.
 
         // Don't flood the sensors channel
-        if (static_cast<uint64_t>(fix.timestamp.getTime()) - last_timestamp < 300) return;
+        if (static_cast<uint64_t>(fix.timestamp.getTime()) - last_timestamp < 500) return;
         last_timestamp = static_cast<uint64_t>(fix.timestamp.getTime());
 
         // epoch timestamp, latitude, longitude, bearing, speed, altitude, accuracy
