@@ -352,8 +352,8 @@ void VideoOutput::input_thread_func()
                         }
                         else
                         {
-                            //do nothing for now?
-                            //scanCode = HUIB_PLAYPAUSE;
+                            // Opens the music screen
+                            scanCode = HUIB_MUSIC;
                         }
                         break;
                     }

@@ -426,17 +426,18 @@
       inner->add_keycodes_supported(HUIB_HOME); // 0x03 AA home
       inner->add_keycodes_supported(HUIB_BACK); // 0x04 Back
       inner->add_keycodes_supported(HUIB_PHONE); // 0x05 Phone screen
-      inner->add_keycodes_supported(HUIB_CALLEND); // 0x06 End call??
+      inner->add_keycodes_supported(HUIB_CALLEND); // 0x06 End call
       //inner->add_keycodes_supported(HUIB_NAV); // 0x07 Nav (This one is not correct)
       inner->add_keycodes_supported(HUIB_UP); // 0x13 Up
       inner->add_keycodes_supported(HUIB_DOWN); // 0x14 Down
-      inner->add_keycodes_supported(HUIB_LEFT); // 0x15 Menu again
-      inner->add_keycodes_supported(HUIB_RIGHT); // 0x16 Mic again
+      inner->add_keycodes_supported(HUIB_LEFT); // 0x15 Left/Menu
+      inner->add_keycodes_supported(HUIB_RIGHT); // 0x16 Right/Mic
       inner->add_keycodes_supported(HUIB_ENTER); // 0x17 Select
       inner->add_keycodes_supported(HUIB_MIC); // 0x54 Mic again
       inner->add_keycodes_supported(HUIB_PLAYPAUSE); // 0x55 Play/Pause
       inner->add_keycodes_supported(HUIB_NEXT); // 0x57 Next track
       inner->add_keycodes_supported(HUIB_PREV); // 0x58 Prev Track
+      inner->add_keycodes_supported(HUIB_MUSIC); // 0xD1 Music Screen
       inner->add_keycodes_supported(HUIB_SCROLLWHEEL);
       // Might as well include these even if we dont use them
       inner->add_keycodes_supported(HUIB_START); // 0x7E (126) Start media
