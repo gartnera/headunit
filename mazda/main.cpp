@@ -122,22 +122,22 @@ static void gps_thread_func(std::condition_variable& quitcv, std::mutex& quitmut
                 const char* sdCardFolder;
                 sdCardFolder = SD_CARD_PATH;
                 struct stat sb;
-                double dataReversed;
+                double newHeading;
     
                 if (stat(sdCardFolder, &sb) == 0 && S_ISDIR(sb.st_mode))
                 {	
-                    dataReversed = data.heading + 180;
-                    if (dataReversed >= 360)
+                    newHeading = data.heading + 180;
+                    if (newHeading >= 360)
                     {
-                        dataReversed = dataReversed - 360;
+                        newHeading = newHeading - 360;
                     }
                 }
                 else
                 {
-                    dataReversed = data.heading;
+                    newHeading = data.heading;
                 }
                 
-                location->set_bearing(static_cast<int32_t>(dataReversed * 1E6));
+                location->set_bearing(static_cast<int32_t>(newHeading * 1E6));
                 //assuming these are the same units as the Android Location API (the rest are)
                 double velocityMetersPerSecond = data.velocity * 0.277778; //convert km/h to m/s
                 location->set_speed(static_cast<int32_t>(velocityMetersPerSecond * 1E3));
