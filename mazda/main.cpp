@@ -19,6 +19,7 @@
 #include <dbus-c++/dbus.h>
 #include <dbus-c++/glib-integration.h>
 #include <sys/time.h>
+#include <sys/stat.h>
 
 #include "hu_uti.h"
 #include "hu_aap.h"
@@ -34,6 +35,8 @@
 
 #define HMI_BUS_ADDRESS "unix:path=/tmp/dbus_hmi_socket"
 #define SERVICE_BUS_ADDRESS "unix:path=/tmp/dbus_service_socket"
+// Check the content folder. sd_nav still exists without the card installed
+#define SD_CARD_PATH "unix:path=/tmp/mnt/sd_nav/content"
 
 __asm__(".symver realpath1,realpath1@GLIBC_2.11.1");
 
@@ -114,7 +117,27 @@ static void gps_thread_func(std::condition_variable& quitcv, std::mutex& quitmut
                 location->set_latitude(static_cast<int32_t>(data.latitude * 1E7));
                 location->set_longitude(static_cast<int32_t>(data.longitude * 1E7));
 
-                location->set_bearing(static_cast<int32_t>(data.heading * 1E6));
+                // If the sd card exists then reverse heading. This should only be used on installs that have the 
+                // reversed heading issue. Maybe gate it by a config file
+                const char* sdCardFolder;
+                sdCardFolder = SD_CARD_PATH;
+                struct stat sb;
+                double dataReversed;
+
+                if (stat(sdCardFolder, &sb) == 0 && S_ISDIR(sb.st_mode))
+                {	
+                    dataReversed = data.heading + 180;
+                    if (dataReversed >= 360)
+                    {
+                        dataReversed = dataReversed - 360;
+                    }
+                }
+                else
+                {
+                    dataReversed = data.heading;
+                }
+                
+                location->set_bearing(static_cast<int32_t>(dataReversed * 1E6));
                 //assuming these are the same units as the Android Location API (the rest are)
                 double velocityMetersPerSecond = data.velocity * 0.277778; //convert km/h to m/s
                 location->set_speed(static_cast<int32_t>(velocityMetersPerSecond * 1E3));
