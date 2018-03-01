@@ -36,7 +36,7 @@
 #define HMI_BUS_ADDRESS "unix:path=/tmp/dbus_hmi_socket"
 #define SERVICE_BUS_ADDRESS "unix:path=/tmp/dbus_service_socket"
 // Check the content folder. sd_nav still exists without the card installed
-#define SD_CARD_PATH "unix:path=/tmp/mnt/sd_nav/content"
+#define SD_CARD_PATH "/tmp/mnt/sd_nav/content"
 
 __asm__(".symver realpath1,realpath1@GLIBC_2.11.1");
 
@@ -123,7 +123,7 @@ static void gps_thread_func(std::condition_variable& quitcv, std::mutex& quitmut
                 sdCardFolder = SD_CARD_PATH;
                 struct stat sb;
                 double dataReversed;
-
+    
                 if (stat(sdCardFolder, &sb) == 0 && S_ISDIR(sb.st_mode))
                 {	
                     dataReversed = data.heading + 180;
