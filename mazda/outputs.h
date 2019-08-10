@@ -35,6 +35,8 @@ class VideoOutput {
     int touch_fd = -1, kbd_fd = -1, ui_fd = -1;
     void input_thread_func();
     void pass_key_to_mzd(int type, int code, int val);
+    uint32_t pressScanCode;
+    time_t pressedSince;
 
 public:
     VideoOutput(MazdaEventCallbacks* callbacks);

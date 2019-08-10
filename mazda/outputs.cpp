@@ -331,34 +331,38 @@ void VideoOutput::input_thread_func()
                         }
                         else
 #endif
-                        if (!callbacks->inCall && isPressed)
-                        {	//go back to home screen
-                            callbacks->releaseVideoFocus();
-                        }
-                        else
                         {	// we can do this since this button does nothing when not on a call
                             scanCode = HUIB_CALLEND;
                         }
                         break;
                     case KEY_T: // FAV
-                        printf("KEY_T (any audio focus: %i media focus: %i is pressed: %i)\n", hasAudioFocus, hasMediaAudioFocus ? 1 : 0, isPressed ? 1 : 0);
-                        if(isPressed)
-                        {
-                            if (hasAudioFocus)
-                            {	// avoid key bounce/repeat by only capturing on key press
-                                callbacks->releaseAudioFocus(); //This will also pause audio automatically in AA
-                            }
-                            else
-                            {	// if we don't have audio focus take focus by playing music
-                                scanCode = HUIB_PLAYPAUSE;
-                            }
-                        }
-                        else if(hasMediaAudioFocus)
-                        {	// This will be the release when audio focus is taken
-                            scanCode = HUIB_PLAYPAUSE;
-                        }
+                        printf("KEY_T\n");
+                        scanCode = HUIB_PLAYPAUSE;
                         break;
                     }
+                    
+                    if (isPressed)
+                    {
+                        pressScanCode = scanCode;
+                        time(&pressedSince);
+                    }
+                    else
+                    {
+                        time_t now = time(NULL);
+                        if (now - pressedSince >= 3)
+                        {
+                            if (pressScanCode == HUIB_PLAYPAUSE)
+                            {
+                                callbacks->releaseAudioFocus();
+                            }
+                            else if (pressScanCode == HUIB_BACK)
+                            {
+                                callbacks->releaseVideoFocus();
+                            }
+                        }
+                        pressScanCode = 0;
+                    }
+
                     if (scanCode != 0 || scrollAmount != 0)
                     {
                         g_hu->hu_queue_command([timeStamp, scanCode, scrollAmount, isPressed, longPress](IHUConnectionThreadInterface& s)
