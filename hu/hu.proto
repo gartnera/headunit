@@ -702,7 +702,12 @@ message BluetoothAuthData
 
 message NAVMessagesStatus
 {
-    optional int32 status = 1;
+    enum STATUS
+    {
+        START = 1;
+        STOP = 2;
+    }
+    optional STATUS status = 1;
 }
 
 message NAVTurnMessage
@@ -747,4 +752,15 @@ message NAVDistanceMessage
 {
     optional int32 distance = 1; //meters
     optional int32 time_until = 2; //seconds
+    optional uint64 display_distance = 3; //distance rounded for display
+    enum DISPLAY_DISTANCE_UNIT
+    {
+        METERS = 1;       // meters * 1000, used when rounded distance < 1000m
+        KILOMETERS10 = 2; // kilometers * 1000, used when rounded distance > 10km, not same as just meters because "km" is displayed on screen
+        KILOMETERS = 3;   // kilometers * 1000, used when rounded distance between 1km and 10km, not same as just meters because "km" is displayed on screen
+        MILES10 = 4;      // miles * 1000, used when rounded distance > 10mi
+        MILES = 5;        // miles * 1000, used when rounded distance between 1mi and 10mi
+        FEET = 6;         // feet * 1000
+    }
+    optional DISPLAY_DISTANCE_UNIT display_distance_unit = 4;
 }

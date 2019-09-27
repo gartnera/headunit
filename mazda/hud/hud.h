@@ -10,14 +10,22 @@
 
 #include "../dbus/generated_cmu.h"
 
+enum HudDistanceUnit: uint8_t {
+    METERS = 1,
+    MILES = 2,
+    KILOMETERS = 3,
+    YARDS = 4,
+    FEET = 5
+};
+
 struct NaviData {
   std::string event_name;
   int32_t turn_side;
   int32_t turn_event;
   int32_t turn_number;
   int32_t turn_angle;
-  int32_t distance;
-  uint8_t distance_unit;
+  int32_t distance; // distance * 10, encoded like that to store one digit after decimal dot in int type
+  HudDistanceUnit distance_unit; 
   int32_t time_until;
   uint8_t previous_msg;
   uint8_t changed;

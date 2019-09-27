@@ -26,8 +26,6 @@ static TMCClient *tmc_client = NULL;
 
 NaviData *navi_data = NULL;
 
-
-
 uint8_t turns[][3] = {
   {0,0,0}, //TURN_UNKNOWN
   {NaviTurns::FLAG_LEFT,NaviTurns::FLAG_RIGHT,NaviTurns::FLAG}, //TURN_DEPART
@@ -36,8 +34,8 @@ uint8_t turns[][3] = {
   {NaviTurns::LEFT,NaviTurns::RIGHT,0}, //TURN_TURN
   {NaviTurns::SHARP_LEFT,NaviTurns::SHARP_RIGHT,0}, //TURN_SHARP_TURN
   {NaviTurns::U_TURN_LEFT, NaviTurns::U_TURN_RIGHT,0}, //TURN_U_TURN
-  {NaviTurns::LEFT,NaviTurns::RIGHT,0}, //TURN_ON_RAMP
-  {NaviTurns::LEFT,NaviTurns::RIGHT,0}, //TURN_OFF_RAMP
+  {NaviTurns::LEFT,NaviTurns::RIGHT,NaviTurns::STRAIGHT}, //TURN_ON_RAMP
+  {NaviTurns::LEFT,NaviTurns::RIGHT,NaviTurns::STRAIGHT}, //TURN_OFF_RAMP
   {NaviTurns::FORK_LEFT, NaviTurns::FORK_RIGHT, 0}, //TURN_FORK
   {NaviTurns::MERGE_LEFT, NaviTurns::MERGE_RIGHT, 0}, //TURN_MERGE
   {0,0,0},  //TURN_ROUNDABOUT_ENTER
@@ -68,18 +66,17 @@ void hud_thread_func(std::condition_variable& quitcv, std::mutex& quitmutex, std
     hudmutex.lock();
 
     uint32_t diricon;
-    if(navi_data->turn_event == 13){
-          diricon = roundabout(navi_data->turn_angle);
-    }
-    else{
+    if (navi_data->turn_event == 13) {
+      diricon = roundabout(navi_data->turn_angle);
+    } else {
       int32_t turn_side = navi_data->turn_side-1; //Google starts at 1 for some reason...
       diricon = turns[navi_data->turn_event][turn_side];
     }
 
     ::DBus::Struct< uint32_t, uint16_t, uint8_t, uint16_t, uint8_t, uint8_t > hudDisplayMsg;
     hudDisplayMsg._1 = diricon;
-    hudDisplayMsg._2 = navi_data->distance;
-    hudDisplayMsg._3 = navi_data->distance_unit; //distance unit 1 = meter?
+    hudDisplayMsg._2 = navi_data->distance;// distance;
+    hudDisplayMsg._3 = navi_data->distance_unit;
     hudDisplayMsg._4 = 0; //Speed limit (Not Used)
     hudDisplayMsg._5 = 0; //Speed limit units (Not used)
     hudDisplayMsg._6 = navi_data->previous_msg;
@@ -116,7 +113,7 @@ void hud_start()
 {
   if (hud_client != NULL)
     return;
-
+    
   try
   {
     DBus::Connection service_bus(SERVICE_BUS_ADDRESS, false);

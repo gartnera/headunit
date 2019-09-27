@@ -649,63 +649,168 @@ void AudioManagerClient::Notify(const std::string &signalName, const std::string
     }
 }
 
-void MazdaEventCallbacks::HandleNaviStatus(IHUConnectionThreadInterface& stream, const HU::NAVMessagesStatus &request){
-}
-
 extern NaviData *navi_data;
 extern std::mutex hudmutex;
 
+void MazdaEventCallbacks::HandleNaviStatus(IHUConnectionThreadInterface& stream, const HU::NAVMessagesStatus &request){
+  if (request.status() == HU::NAVMessagesStatus_STATUS_STOP) {
+    hudmutex.lock();
+    navi_data->event_name = "";
+    navi_data->turn_event = 0;
+    navi_data->turn_side = 0;
+    navi_data->turn_number = -1;
+    navi_data->turn_angle = -1;
+    navi_data->changed = 1;
+    navi_data->previous_msg = navi_data->previous_msg + 1;
+    if (navi_data->previous_msg == 8){
+      navi_data->previous_msg = 1;
+    }
+    hudmutex.unlock();
+  }
+}
+
+void logUnknownFields(const ::google::protobuf::UnknownFieldSet& fields);
+
 void MazdaEventCallbacks::HandleNaviTurn(IHUConnectionThreadInterface& stream, const HU::NAVTurnMessage &request){
+  logw("NAVTurnMessage: turn_side: %d, turn_event: %d, turn_number: %d, turn_angle: %d, event_name: %s", 
+      request.turn_side(),
+      request.turn_event(),
+      request.turn_number(),
+      request.turn_angle(),
+      request.event_name().c_str()
+  );
+  logUnknownFields(request.unknown_fields());
+
   hudmutex.lock();
   int changed = 0;
-  if(navi_data->event_name != request.event_name()){
+  if (navi_data->event_name != request.event_name()) {
     navi_data->event_name = request.event_name();
     changed = 1;
   }
-  if(navi_data->turn_event != request.turn_event()){
+  if (navi_data->turn_event != request.turn_event()) {
     navi_data->turn_event = request.turn_event();
     changed = 1;
   }
-  if(navi_data->turn_side != request.turn_side()){
+  if (navi_data->turn_side != request.turn_side()) {
     navi_data->turn_side = request.turn_side();
     changed = 1;
   }
-  if(navi_data->turn_number != request.turn_number()){
+  if (navi_data->turn_number != request.turn_number()) {
     navi_data->turn_number = request.turn_number();
     changed = 1;
   }
-  if(navi_data->turn_angle != request.turn_angle()){
+  if (navi_data->turn_angle != request.turn_angle()) {
     navi_data->turn_angle = request.turn_angle();
     changed = 1;
   }
-  if(changed){
+  if (changed) {
     navi_data->changed = 1;
     navi_data->previous_msg = navi_data->previous_msg+1;
-    if(navi_data->previous_msg == 8){
+    if (navi_data->previous_msg == 8) {
       navi_data->previous_msg = 1;
     }
   }
   hudmutex.unlock();
 }
 
-void MazdaEventCallbacks::HandleNaviTurnDistance(IHUConnectionThreadInterface& stream, const HU::NAVDistanceMessage &request){
+void MazdaEventCallbacks::HandleNaviTurnDistance(IHUConnectionThreadInterface& stream, const HU::NAVDistanceMessage &request) {
   hudmutex.lock();
-  if(request.distance() > 1000){
-    int now_distance = request.distance()/100;
-    if(now_distance != navi_data->distance){
-      navi_data->distance_unit = 3;
-      navi_data->distance = now_distance;
-      navi_data->changed = 1;
-    }
+  int now_distance;
+  HudDistanceUnit now_unit;
+  switch (request.display_distance_unit()) {
+      case HU::NAVDistanceMessage_DISPLAY_DISTANCE_UNIT_METERS:
+        now_distance = request.display_distance() / 100;
+        now_unit = HudDistanceUnit::METERS;
+        break;
+      case HU::NAVDistanceMessage_DISPLAY_DISTANCE_UNIT_KILOMETERS10:
+      case HU::NAVDistanceMessage_DISPLAY_DISTANCE_UNIT_KILOMETERS:
+        now_distance = request.display_distance() / 100;
+        now_unit = HudDistanceUnit::KILOMETERS;
+        break;
+      case HU::NAVDistanceMessage_DISPLAY_DISTANCE_UNIT_MILES10:
+      case HU::NAVDistanceMessage_DISPLAY_DISTANCE_UNIT_MILES:
+        now_distance = request.display_distance() / 100;
+        now_unit = HudDistanceUnit::MILES;
+        break;
+      case HU::NAVDistanceMessage_DISPLAY_DISTANCE_UNIT_FEET:
+        now_distance = request.display_distance() / 100;
+        now_unit = HudDistanceUnit::FEET;
+        break;
+      default: //not sure, use SI and log
+        logw("NAVDistanceMessage: distance: %d, time: %d, display_distance: %u, display_distance_unit: %d", 
+            request.distance(),
+            request.time_until(),
+            request.display_distance(),
+            request.display_distance_unit()
+        );
+        logUnknownFields(request.unknown_fields());
+
+        if (request.distance() > 1000) {
+            now_distance = request.distance() / 100;
+            now_unit = HudDistanceUnit::KILOMETERS;
+        } else {
+            now_distance = (((request.distance() + 5) / 10) * 10) * 10;
+            now_unit = HudDistanceUnit::METERS;
+        }
   }
-  else{
-    int now_distance = (((request.distance() + 5) / 10)*10)*10;
-    if(now_distance != navi_data->distance){
-      navi_data->distance_unit = 1;
-      navi_data->distance = now_distance;
-      navi_data->changed = 1;
-    }
+  
+  if (now_distance != navi_data->distance || now_unit != navi_data->distance_unit) {
+    navi_data->distance_unit = now_unit;
+    navi_data->distance = now_distance;
+    navi_data->changed = 1;
   }
-  navi_data->time_until = request.time_until();
+
+  if (navi_data->time_until != request.time_until()) {
+    navi_data->time_until = request.time_until();
+    navi_data->changed = 1;
+  }
+
   hudmutex.unlock();
+}
+
+void logUnknownFields(const ::google::protobuf::UnknownFieldSet& fields) {
+  for (int i = 0; i < fields.field_count(); i++) {
+    switch (fields.field(i).type()) {
+        case 0: // TYPE_VARINT
+            logw("ExtraField: number: %d, type: %d, value: %d", 
+                fields.field(i).number(),
+                0,
+                fields.field(i).varint()
+            );
+            break;
+        case 1: // TYPE_FIXED32
+            logw("ExtraField: number: %d, type: %d, value: %d", 
+                fields.field(i).number(),
+                1,
+                fields.field(i).fixed32()
+            );
+            break;
+        case 2: // TYPE_FIXED64
+            logw("ExtraField: number: %d, type: %d, value: %d", 
+                fields.field(i).number(),
+                2,
+                fields.field(i).fixed64()
+            );
+            break;
+        case 3: // TYPE_LENGTH_DELIMITED
+            logw("ExtraField: number: %d, type: %d, value: %s", 
+                fields.field(i).number(),
+                3,
+                &(fields.field(i).length_delimited())
+            );
+            break;
+        case 4: // TYPE_GROUP
+            logw("ExtraField: number: %d, type: %d", 
+                fields.field(i).number(),
+                4
+            );
+            break;
+        default:
+            logw("ExtraField: number: %d, type: %d", 
+                fields.field(i).number(),
+                fields.field(i).type()
+            );
+            break;
+    }
+  }
 }
