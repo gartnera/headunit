@@ -34,10 +34,10 @@
 
   }
 
-  int HUServer::ihu_tra_start (HU_TRANSPORT_TYPE transportType, bool waitForDevice) {
+  int HUServer::ihu_tra_start (HU_TRANSPORT_TYPE transportType, std::string& phoneIpAddress, bool waitForDevice) {
     if (transportType == HU_TRANSPORT_TYPE::WIFI) {
       logd ("AA over Wifi");
-      transport = std::unique_ptr<HUTransportStream>(new HUTransportStreamTCP());
+      transport = std::unique_ptr<HUTransportStream>(new HUTransportStreamTCP(phoneIpAddress));
       iaap_tra_recv_tmo = 1000;
       iaap_tra_send_tmo = 2000;
     }
@@ -1310,7 +1310,7 @@
 
   static_assert(PIPE_BUF >= sizeof(IHUAnyThreadInterface::HUThreadCommand*), "PIPE_BUF is tool small for a pointer?");
 
-  int HUServer::hu_aap_start (HU_TRANSPORT_TYPE transportType, bool waitForDevice) {                // Starts Transport/USBACC/OAP, then AA protocol w/ VersReq(1), SSL handshake, Auth Complete
+  int HUServer::hu_aap_start (HU_TRANSPORT_TYPE transportType, std::string& phoneIpAddress, bool waitForDevice) {                // Starts Transport/USBACC/OAP, then AA protocol w/ VersReq(1), SSL handshake, Auth Complete
 
     if (iaap_state == hu_STATE_STARTED || iaap_state == hu_STATE_STARTIN) {
       loge ("CHECK: iaap_state: %d (%s)", iaap_state, state_get (iaap_state));
@@ -1322,7 +1322,7 @@
     iaap_state = hu_STATE_STARTIN;
     logd ("  SET: iaap_state: %d (%s)", iaap_state, state_get (iaap_state));
 
-    int ret = ihu_tra_start (transportType, waitForDevice);                   // Start Transport/USBACC/OAP
+    int ret = ihu_tra_start (transportType, phoneIpAddress, waitForDevice);                   // Start Transport/USBACC/OAP
     if (ret) {
       iaap_state = hu_STATE_STOPPED;
       logd ("  SET: iaap_state: %d (%s)", iaap_state, state_get (iaap_state));

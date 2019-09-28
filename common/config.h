@@ -14,6 +14,7 @@ public:
     static bool launchOnDevice;
     static bool carGPS;
     static HU_TRANSPORT_TYPE transport_type;
+    static std::string phoneIpAddress;
     static bool reverseGPS;
 
 private:

@@ -187,7 +187,7 @@ class HUServer : protected IHUConnectionThreadInterface
 {
 public:
   //Must be called from the "main" thread (as defined by the user)
-  int hu_aap_start    (HU_TRANSPORT_TYPE transportType, bool waitForDevice);
+  int hu_aap_start    (HU_TRANSPORT_TYPE transportType, std::string& phoneIpAddress, bool waitForDevice);
   int hu_aap_shutdown ();
 
   HUServer(IHUConnectionThreadEventCallbacks& callbacks);
@@ -227,7 +227,7 @@ protected:
   int hu_ssl_begin_handshake ();
   int hu_handle_SSLHandshake(int chan, byte * buf, int len);
 
-  int ihu_tra_start (HU_TRANSPORT_TYPE transportType, bool waitForDevice);
+  int ihu_tra_start (HU_TRANSPORT_TYPE transportType, std::string& phoneIpAddress, bool waitForDevice);
   int ihu_tra_stop();
   int iaap_msg_process (int chan, uint16_t msg_type, byte * buf, int len);
 

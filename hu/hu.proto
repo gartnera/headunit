@@ -422,10 +422,9 @@ message ChannelDescriptor
 
     optional VendorExtensionService vendor_extension_service = 12;
 
-    //vendor extension==12
-    //genericnotification==13
     message GenericNotificationService
     {
+        optional string name = 1;
     }
     optional GenericNotificationService generic_notification_service = 13;
 }

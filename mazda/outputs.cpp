@@ -349,16 +349,21 @@ void VideoOutput::input_thread_func()
                     else
                     {
                         time_t now = time(NULL);
-                        if (now - pressedSince >= 3)
+                        if (now - pressedSince >= 2)
                         {
                             if (pressScanCode == HUIB_PLAYPAUSE)
                             {
                                 callbacks->releaseAudioFocus();
                             }
-                            else if (pressScanCode == HUIB_BACK)
+                            else if (pressScanCode == HUIB_BACK || pressScanCode == HUIB_CALLEND)
                             {
                                 callbacks->releaseVideoFocus();
                             }
+                            else if (pressScanCode == HUIB_HOME)
+                            {
+                                callbacks->takeVideoFocus();
+                            }
+
                         }
                         pressScanCode = 0;
                     }

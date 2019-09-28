@@ -7,6 +7,7 @@ std::string config::configFile = "/tmp/root/headunit.json";
 bool config::launchOnDevice = true;
 bool config::carGPS = true;
 HU_TRANSPORT_TYPE config::transport_type = HU_TRANSPORT_TYPE::USB;
+std::string config::phoneIpAddress = "192.168.43.1";
 bool config::reverseGPS = false;
 
 void config::parseJson(json config_json)
@@ -22,6 +23,10 @@ void config::parseJson(json config_json)
     if (config_json["wifiTransport"].is_boolean())
     {
         config::transport_type = config_json["wifiTransport"] ? HU_TRANSPORT_TYPE::WIFI : HU_TRANSPORT_TYPE::USB;
+    }
+    if (config_json["phoneIpAddress"].is_string())
+    {
+        config::phoneIpAddress = config_json["phoneIpAddress"];
     }
     if (config_json["reverseGPS"].is_boolean())
     {

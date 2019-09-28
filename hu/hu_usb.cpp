@@ -306,7 +306,7 @@ void HUTransportStreamUSB::libusb_callback_send(libusb_transfer *transfer)
   libusb_transfer_status recv_last_status = transfer->status;
   if (recv_last_status != LIBUSB_TRANSFER_COMPLETED)
   {
-    loge("libusb_callback: abort");
+    loge("libusb_callback_send: abort");
     write(abort_usb_thread_pipe_write_fd, &abort_usb_thread_pipe_write_fd, 1);
   }
   free(transfer->buffer);
@@ -488,10 +488,10 @@ int HUTransportStreamUSB::Start(bool waitForDevice) {
   libusb_device* got_device = libusb_get_device(iusb_dev_hndl);
 
   //OAP uses config 0 for normal operation
-  struct libusb_config_descriptor * config = NULL;
+  struct libusb_config_descriptor * config = nullptr;
   usb_err = libusb_get_config_descriptor (got_device, 0, &config);
   if (usb_err != 0) {
-    loge ("Error libusb_get_active_config_descriptor usb_err: %d (%s)  errno: %d (%s)", usb_err, iusb_error_get (usb_err), errno, strerror (errno));
+    loge ("Error libusb_get_config_descriptor usb_err: %d (%s)  errno: %d (%s)", usb_err, iusb_error_get (usb_err), errno, strerror (errno));
     Stop();
     return (-1);
   }

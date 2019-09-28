@@ -9,6 +9,7 @@ class HUTransportStreamTCP : public HUTransportStream
     socklen_t cli_len = 0;
     struct sockaddr_in  srv_addr = {0};
     socklen_t srv_len = 0;
+    std::string& phoneIpAddress;
 
     int wifi_direct = 0;//0;
     int itcp_deinit ();
@@ -16,7 +17,7 @@ class HUTransportStreamTCP : public HUTransportStream
     int itcp_init();
  public:
     ~HUTransportStreamTCP();
-    HUTransportStreamTCP() {}
+    HUTransportStreamTCP(std::string& phoneIpAddress): phoneIpAddress(phoneIpAddress) {}
     virtual int Start(bool waitForDevice) override;
     virtual int Stop() override;
     virtual int Write(const byte* buf, int len, int tmo) override;

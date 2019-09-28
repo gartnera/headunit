@@ -1,5 +1,6 @@
 {
     "launchOnDevice": true,
     "carGPS": true,
-    "wifiTransport":true
+    "wifiTransport":true,
+    "phoneIpAddress": "192.168.43.1"
 }
