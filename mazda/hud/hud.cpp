@@ -49,9 +49,9 @@ uint8_t turns[][3] = {
   {NaviTurns::DESTINATION_LEFT, NaviTurns::DESTINATION_RIGHT, NaviTurns::DESTINATION} //TURN_DESTINATION
 };
 
-uint8_t roundabout(int32_t degrees){
+uint8_t roundabout(int32_t degrees, int32_t side){
   uint8_t nearest = (degrees + 15) / 30;
-  uint8_t offset = 37; //+49 for Left hand drive?
+  uint8_t offset = side == 0 ? 49 : 37;
   return(nearest + offset);
 }
 
@@ -67,9 +67,9 @@ void hud_thread_func(std::condition_variable& quitcv, std::mutex& quitmutex, std
 
     uint32_t diricon;
     if (navi_data->turn_event == 13) {
-      diricon = roundabout(navi_data->turn_angle);
+      diricon = roundabout(navi_data->turn_angle, navi_data->turn_side - 1);
     } else {
-      int32_t turn_side = navi_data->turn_side-1; //Google starts at 1 for some reason...
+      int32_t turn_side = navi_data->turn_side - 1; //Google starts at 1 for some reason...
       diricon = turns[navi_data->turn_event][turn_side];
     }
 
