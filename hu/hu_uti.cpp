@@ -44,9 +44,9 @@ int gen_server_poll_func (int poll_ms);
 
   // Log stuff:
 
-int ena_log_extra   = 1;//1;//0;
-int ena_log_verbo   = 1;//1;
-int ena_log_debug   = 1;
+int ena_log_extra   = 0;
+int ena_log_verbo   = 0;
+int ena_log_debug   = 0;
 int ena_log_warni   = 1;
 int ena_log_error   = 1;
 
@@ -100,7 +100,9 @@ int hu_log (int prio, const char * tag, const char * func, const char * fmt, ...
   int len = vsnprintf (log_line, sizeof (log_line), fmt, aq);
 
   //Time doesn't work on CMU anyway, always says 1970
-  printf ("%s: %s: %s : %s\n", prio_get (prio), tag, func, log_line);
+  time_t timestamp;
+  time(&timestamp);
+  printf ("%d %s: %s: %s : %s\n", timestamp, prio_get (prio), tag, func, log_line);
 
   va_end(aq);
 #endif
