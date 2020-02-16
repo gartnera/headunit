@@ -30,7 +30,7 @@ uint8_t turns[][3] = {
   {0,0,0}, //TURN_UNKNOWN
   {NaviTurns::FLAG_LEFT,NaviTurns::FLAG_RIGHT,NaviTurns::FLAG}, //TURN_DEPART
   {NaviTurns::STRAIGHT,NaviTurns::STRAIGHT,NaviTurns::STRAIGHT}, //TURN_NAME_CHANGE
-  {NaviTurns::SLIGHT_LEFT,NaviTurns::SLIGHT_RIGHT,0}, //TURN_SLIGHT_TURN
+  {NaviTurns::SLIGHT_LEFT,NaviTurns::SLIGHT_RIGHT,NaviTurns::STRAIGHT}, //TURN_SLIGHT_TURN
   {NaviTurns::LEFT,NaviTurns::RIGHT,0}, //TURN_TURN
   {NaviTurns::SHARP_LEFT,NaviTurns::SHARP_RIGHT,0}, //TURN_SHARP_TURN
   {NaviTurns::U_TURN_LEFT, NaviTurns::U_TURN_RIGHT,0}, //TURN_U_TURN
