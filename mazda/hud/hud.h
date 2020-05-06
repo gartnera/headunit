@@ -50,7 +50,9 @@ enum NaviTurns: uint32_t {
   FORK_LEFT = 15,
   FORK_RIGHT = 14,
   MERGE_LEFT = 16,
-  MERGE_RIGHT = 17
+  MERGE_RIGHT = 17,
+  OFF_RAMP_LEFT = 7,
+  OFF_RAMP_RIGHT = 30
 };
 
 void hud_start();
