@@ -234,13 +234,13 @@ Channel specified for each service:
 
     if (log_dmp) {
       //logd ("iaad_dmp_arry n: %d  num: %d  alen: %ld", n, num, alen); // Dump raw array
-      char str_buf [256] = {0};
+      char str_buf [255] = {0};
       int ctr = 0;
       for (ctr = 0; ctr < n - 1; ctr ++)
         strncat (str_buf, "                    ", sizeof(str_buf) - strlen(str_buf) - 1);
 
       char str_buf2 [256] = {0};
-      snprintf (str_buf2, sizeof (str_buf), "%s%1.1u", str_buf, num);   // Dump raw array
+      snprintf (str_buf2, sizeof (str_buf2), "%s%1.1u", str_buf, num);   // Dump raw array
       hex_dump (str_buf2, 16, buf, alen);
     }
 

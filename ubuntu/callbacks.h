@@ -6,7 +6,7 @@
 #include "audio.h"
 #include "command_server.h"
 
-#include <asoundlib.h>
+#include <alsa/asoundlib.h>
 #include "version.h"
 
 class VideoOutput;

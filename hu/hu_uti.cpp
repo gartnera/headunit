@@ -102,7 +102,7 @@ int hu_log (int prio, const char * tag, const char * func, const char * fmt, ...
   //Time doesn't work on CMU anyway, always says 1970
   time_t timestamp;
   time(&timestamp);
-  printf ("%d %s: %s: %s : %s\n", timestamp, prio_get (prio), tag, func, log_line);
+  printf ("%ld %s: %s: %s : %s\n", timestamp, prio_get (prio), tag, func, log_line);
 
   va_end(aq);
 #endif

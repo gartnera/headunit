@@ -1166,6 +1166,7 @@
       delete ptr;
       loge("hu_queue_command error %d", ret);
     }
+    return ret;
   }
 
   int HUServer::hu_aap_shutdown()

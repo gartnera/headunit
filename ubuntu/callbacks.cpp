@@ -204,7 +204,7 @@ void DesktopEventCallbacks::HandleNaviStatus(IHUConnectionThreadInterface& strea
 void DesktopEventCallbacks::HandleNaviTurn(IHUConnectionThreadInterface& stream, const HU::NAVTurnMessage &request){
     const char *event_name = &request.event_name()[0];
     std::string image = request.image();
-    printf(event_name);
+    printf("%s", event_name);
     logv ("AA_CH_NAVI: %s, TurnSide: %d, TurnEvent:%d, TurnNumber: %d, TurnAngle: %d", event_name, request.turn_side(), request.turn_event(), request.turn_number(), request.turn_angle());
     hex_dump("AA_CH_NAVI", 256, (unsigned char*)image.c_str(), image.length());
 }
