@@ -1286,7 +1286,8 @@
         {
           logd("Got command_read_fd");
           IHUAnyThreadInterface::HUThreadCommand* ptr = nullptr;
-          if(ptr = hu_pop_command())
+          ptr = hu_pop_command();
+          if(ptr)
           {
             logd("Running %p", ptr);
             (*ptr)(*this);

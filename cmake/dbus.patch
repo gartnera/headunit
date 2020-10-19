@@ -1,0 +1,54 @@
+diff --git a/include/dbus-c++/dispatcher.h b/include/dbus-c++/dispatcher.h
+index b5b5536..b7a4534 100644
+--- a/include/dbus-c++/dispatcher.h
++++ b/include/dbus-c++/dispatcher.h
+@@ -267,6 +267,18 @@ struct Threading
+     return new Mx;
+   }
+ 
++#ifndef DBUS_HAS_RECURSIVE_MUTEX
++	static bool mutex_free(Mutex *mx)
++	{
++		delete mx;
++		return false;
++	}
++	static bool mutex_lock(Mutex *mx)
++	{
++		mx->lock();
++		return false;
++	}
++#else
+   static void mutex_free(Mutex *mx)
+   {
+     delete mx;
+@@ -276,6 +288,7 @@ struct Threading
+   {
+     mx->lock();
+   }
++#endif//DBUS_HAS_RECURSIVE_MUTEX
+ 
+   static void mutex_unlock(Mutex *mx)
+   {
+diff --git a/src/eventloop-integration.cpp b/src/eventloop-integration.cpp
+index 0cc65c3..5776971 100644
+--- a/src/eventloop-integration.cpp
++++ b/src/eventloop-integration.cpp
+@@ -38,6 +38,7 @@
+ #include <cassert>
+ #include <sys/poll.h>
+ #include <fcntl.h>
++#include <unistd.h>
+ 
+ using namespace DBus;
+ using namespace std;
+diff --git a/src/pipe.cpp b/src/pipe.cpp
+index 01211b3..d0572c7 100644
+--- a/src/pipe.cpp
++++ b/src/pipe.cpp
+@@ -83,5 +83,5 @@ ssize_t Pipe::read(void *buffer, unsigned int &nbytes)
+ void Pipe::signal()
+ {
+   // TODO: ignoring return of read/write generates warning; maybe relevant for eventloop work...
+-  ::write(_fd_write, '\0', 1);
++  ::write(_fd_write, "\0", 1);
+ }

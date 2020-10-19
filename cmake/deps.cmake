@@ -52,3 +52,39 @@ if(GIT_EXECUTABLE)
 
     configure_file(cmake/version.in.h ${CMAKE_CURRENT_BINARY_DIR}/version.h @ONLY)
 endif()
+
+if(BUILD_MAZDA)
+
+    find_package(DBus REQUIRED)
+
+    set(THIRD_PARTY_DIR ${CMAKE_SOURCE_DIR}/third_party)
+
+    include(ExternalProject)
+    ExternalProject_Add(dbus-cplusplus
+        GIT_REPOSITORY https://github.com/GENIVI/dbus-cplusplus.git
+        GIT_TAG master
+        GIT_SHALLOW true
+        PATCH_COMMAND
+            cd ${THIRD_PARTY_DIR}/dbus-cplusplus &&
+            git checkout . &&
+            git apply ${CMAKE_CURRENT_SOURCE_DIR}/cmake/dbus.patch
+        SOURCE_DIR ${THIRD_PARTY_DIR}/dbus-cplusplus
+        BUILD_IN_SOURCE 0
+        WORKING_DIRECTORY ${THIRD_PARTY_DIR}/dbus-cplusplus
+        CONFIGURE_COMMAND ./autogen.sh --prefix=${CMAKE_STAGING_PREFIX} --disable--ecore --disable-tests --disable-examples
+        BUILD_COMMAND make
+        INSTALL_COMMAND make install
+    )
+
+    if(NOT CMAKE_CROSSCOMPILING)
+        set(GEN_DBUS_HEADER_COMMAND ${CMAKE_STAGING_PREFIX}/bin/dbusxx-xml2cpp)
+    else() # TODO - expect cross compile host to be x86-64
+        set(GEN_DBUS_HEADER_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/mazda/dbus/dbusxx-xml2cpp)
+    endif()
+
+    add_custom_command(TARGET dbus-cplusplus POST_BUILD
+        COMMAND ${GEN_DBUS_HEADER_COMMAND} cmu_interfaces.xml --proxy=generated_cmu.h
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/mazda/dbus
+        COMMENT "Generating generated_cmu.h")
+
+endif()

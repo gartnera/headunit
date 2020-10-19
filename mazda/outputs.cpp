@@ -435,19 +435,19 @@ VideoOutput::VideoOutput(MazdaEventCallbacks* callbacks)
 
     if (ioctl(ui_fd, UI_SET_EVBIT, EV_KEY) < 0)
     {
-        fprintf(stderr, "UI_SET_EVBIT failed on %s\n", EV_KEY);
+        fprintf(stderr, "UI_SET_EVBIT failed on %c\n", EV_KEY);
     }
     if (ioctl(ui_fd, UI_SET_KEYBIT, KEY_LEFTBRACE) < 0)
     {
-        fprintf(stderr, "UI_SET_KEYBIT failed on %s\n", KEY_LEFTBRACE);
+        fprintf(stderr, "UI_SET_KEYBIT failed on %c\n", KEY_LEFTBRACE);
     }
     if (ioctl(ui_fd, UI_SET_KEYBIT, KEY_RIGHTBRACE) < 0)
     {
-        fprintf(stderr, "UI_SET_KEYBIT failed on %s\n", KEY_RIGHTBRACE);
+        fprintf(stderr, "UI_SET_KEYBIT failed on %c\n", KEY_RIGHTBRACE);
     }
     if (ioctl(ui_fd, UI_SET_KEYBIT, KEY_E) < 0)
     {
-        fprintf(stderr, "UI_SET_KEYBIT failed on %s\n", KEY_E);
+        fprintf(stderr, "UI_SET_KEYBIT failed on %c\n", KEY_E);
     }
     struct uinput_user_dev uidev;
     memset(&uidev, 0, sizeof(uidev));
@@ -534,9 +534,9 @@ VideoOutput::~VideoOutput()
 void VideoOutput::MediaPacket(uint64_t timestamp, const byte *buf, int len)
 {
     GstBuffer * buffer = gst_buffer_new_and_alloc(len);
-    memcpy(GST_BUFFER_DATA(buffer), buf, len);
-    int ret = gst_app_src_push_buffer(vid_src, buffer);
-    if(ret !=  GST_FLOW_OK){
+    gst_buffer_fill(buffer, 0, buf, len);
+    int ret = gst_app_src_push_buffer((GstAppSrc *) vid_src, buffer);
+    if (ret != GST_FLOW_OK) {
         printf("push buffer returned %d for %d bytes \n", ret, len);
     }
 }

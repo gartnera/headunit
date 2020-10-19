@@ -4,7 +4,6 @@
 *.project
 *.workspace
 .idea/
-CMakeLists.txt
 cmake-build-debug/
 mazda/installer/config/androidauto/data_persist/dev/bin/headunit
 *.creator.user
@@ -12,3 +11,4 @@ bin/
 */version\.h
 .vscode
 build
+third_party
