@@ -34,10 +34,18 @@ env:
     - BUILD_TYPE=Debug      CMAKE_ARGS="-DCMAKE_STAGING_PREFIX=`pwd`/staging/usr/local"
     - BUILD_TYPE=Release    CMAKE_ARGS="-DCMAKE_STAGING_PREFIX=`pwd`/staging/usr/local"
     - BUILD_TYPE=MinSizeRel CMAKE_ARGS="-DCMAKE_STAGING_PREFIX=`pwd`/staging/usr/local"
-
-    - BUILD_TYPE=Debug      CMAKE_ARGS="-DBUILD_MAZDA=ON -DCMAKE_STAGING_PREFIX=`pwd`/staging/usr/local"
-    - BUILD_TYPE=Release    CMAKE_ARGS="-DBUILD_MAZDA=ON -DCMAKE_STAGING_PREFIX=`pwd`/staging/usr/local"
-    - BUILD_TYPE=MinSizeRel CMAKE_ARGS="-DBUILD_MAZDA=ON -DCMAKE_STAGING_PREFIX=`pwd`/staging/usr/local"
+    - BUILD_TYPE=Debug \
+      PATH=${TRAVIS_BUILD_DIR}/../mazda/m3-toolchain:$PATH \
+      CMAKE_ARGS="-DCMAKE_TOOLCHAIN_FILE=${TRAVIS_BUILD_DIR}/../cmake/gcc-toolchain.cmake \
+                  -DBUILD_MAZDA=ON -DCMAKE_STAGING_PREFIX=`pwd`/staging/usr/local"
+    - BUILD_TYPE=Release \
+      PATH=${TRAVIS_BUILD_DIR}/../mazda/m3-toolchain:$PATH \
+      CMAKE_ARGS="-DCMAKE_TOOLCHAIN_FILE=${TRAVIS_BUILD_DIR}/../cmake/gcc-toolchain.cmake \
+                  -DBUILD_MAZDA=ON -DCMAKE_STAGING_PREFIX=`pwd`/staging/usr/local"
+    - BUILD_TYPE=MinSizeRel \
+      PATH=${TRAVIS_BUILD_DIR}/../mazda/m3-toolchain:$PATH \
+      CMAKE_ARGS="-DCMAKE_TOOLCHAIN_FILE=${TRAVIS_BUILD_DIR}/../cmake/gcc-toolchain.cmake \
+                  -DBUILD_MAZDA=ON -DCMAKE_STAGING_PREFIX=`pwd`/staging/usr/local"
 
 script:
   - env
