@@ -5,7 +5,7 @@
 #include <algorithm>
 
 
-#include <libusb.h>
+#include <libusb-1.0/libusb.h>
 
 #ifndef LIBUSB_LOG_LEVEL_NONE
 #define LIBUSB_LOG_LEVEL_NONE     0
@@ -355,7 +355,7 @@ int HUTransportStreamUSB::Start(bool waitForDevice) {
       return (-1);
   }
 
-  libusb_set_debug(iusb_ctx, LIBUSB_LOG_LEVEL_INFO);
+  libusb_set_option(iusb_ctx, LIBUSB_OPTION_LOG_LEVEL, LIBUSB_LOG_LEVEL_INFO);
 
   //See if there is a OAP device already
   while ((iusb_dev_hndl = find_oap_device()) == nullptr)

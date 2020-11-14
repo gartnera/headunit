@@ -1,0 +1,2 @@
+
+#define HEADUNIT_VERSION "@BUILD_HASH@"

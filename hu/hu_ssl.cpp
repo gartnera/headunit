@@ -138,7 +138,7 @@
     else
       logd ("BIO_free(pkey_bio) ret: %d", ret);
 
-    hu_ssl_method = (SSL_METHOD *) TLSv1_2_client_method ();
+    hu_ssl_method = (SSL_METHOD *)SSLv23_client_method();
     if (hu_ssl_method == NULL) {
       loge ("TLSv1_2_client_method() error");
       return (-1);

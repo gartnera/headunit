@@ -7,7 +7,7 @@
 #include "command_server.h"
 #include "audio.h"
 #include <dbus-c++/dbus.h>
-#include <asoundlib.h>
+#include <alsa/asoundlib.h>
 
 #include "dbus/generated_cmu.h"
 #include "version.h"

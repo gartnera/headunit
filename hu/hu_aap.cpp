@@ -1166,6 +1166,7 @@
       delete ptr;
       loge("hu_queue_command error %d", ret);
     }
+    return ret;
   }
 
   int HUServer::hu_aap_shutdown()
@@ -1285,7 +1286,8 @@
         {
           logd("Got command_read_fd");
           IHUAnyThreadInterface::HUThreadCommand* ptr = nullptr;
-          if(ptr = hu_pop_command())
+          ptr = hu_pop_command();
+          if(ptr)
           {
             logd("Running %p", ptr);
             (*ptr)(*this);
