@@ -100,8 +100,6 @@ target_link_libraries(headunit PUBLIC
 )
 
 if(BUILD_MAZDA)
-    add_dependencies(headunit dbus-cplusplus)
-
     target_compile_options(headunit PUBLIC -static-libstdc++ -DCMU=1)
 
     target_include_directories(headunit PUBLIC

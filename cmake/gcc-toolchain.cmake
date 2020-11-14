@@ -22,8 +22,10 @@
 # SOFTWARE.
 #
 
+include_guard()
+
 IF(NOT TRIPLE)
-  set(TRIPLE arm-none-eabi)
+  set(TRIPLE arm-cortexa9_neon-linux-gnueabi)
 endif()
 
 message(STATUS "Triple ................. ${TRIPLE}")

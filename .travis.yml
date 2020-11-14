@@ -34,18 +34,33 @@ env:
     - BUILD_TYPE=Debug      CMAKE_ARGS="-DCMAKE_STAGING_PREFIX=`pwd`/staging/usr/local"
     - BUILD_TYPE=Release    CMAKE_ARGS="-DCMAKE_STAGING_PREFIX=`pwd`/staging/usr/local"
     - BUILD_TYPE=MinSizeRel CMAKE_ARGS="-DCMAKE_STAGING_PREFIX=`pwd`/staging/usr/local"
-    - BUILD_TYPE=Debug \
-      PATH=${TRAVIS_BUILD_DIR}/../mazda/m3-toolchain:$PATH \
-      CMAKE_ARGS="-DCMAKE_TOOLCHAIN_FILE=${TRAVIS_BUILD_DIR}/../cmake/gcc-toolchain.cmake \
-                  -DBUILD_MAZDA=ON -DCMAKE_STAGING_PREFIX=`pwd`/staging/usr/local"
-    - BUILD_TYPE=Release \
-      PATH=${TRAVIS_BUILD_DIR}/../mazda/m3-toolchain:$PATH \
-      CMAKE_ARGS="-DCMAKE_TOOLCHAIN_FILE=${TRAVIS_BUILD_DIR}/../cmake/gcc-toolchain.cmake \
-                  -DBUILD_MAZDA=ON -DCMAKE_STAGING_PREFIX=`pwd`/staging/usr/local"
-    - BUILD_TYPE=MinSizeRel \
-      PATH=${TRAVIS_BUILD_DIR}/../mazda/m3-toolchain:$PATH \
-      CMAKE_ARGS="-DCMAKE_TOOLCHAIN_FILE=${TRAVIS_BUILD_DIR}/../cmake/gcc-toolchain.cmake \
-                  -DBUILD_MAZDA=ON -DCMAKE_STAGING_PREFIX=`pwd`/staging/usr/local"
+    - BUILD_TYPE=Debug
+      CMAKE_ARGS="-DCMAKE_TOOLCHAIN_FILE=${TRAVIS_BUILD_DIR}/cmake/gcc-toolchain.cmake
+                  -DBUILD_MAZDA=ON -DCMAKE_STAGING_PREFIX=`pwd`/staging/usr/local
+                  -DOPENSSL_CRYPTO_LIBRARY=${TRAVIS_BUILD_DIR}/mazda/m3-toolchain/arm-cortexa9_neon-linux-gnueabi/sysroot/usr/lib/libcrypto.a
+                  -DOPENSSL_INCLUDE_DIR=${TRAVIS_BUILD_DIR}/mazda/m3-toolchain/arm-cortexa9_neon-linux-gnueabi/sysroot/usr/include
+                  -DProtobuf_LIBRARIES=${TRAVIS_BUILD_DIR}/mazda/protobuf-2.6.1-arm/lib/libprotobuf-lite.a
+                  -DProtobuf_INCLUDE_DIR=${TRAVIS_BUILD_DIR}/mazda/protobuf-2.6.1-arm/include"
+      export PKG_CONFIG_PATH=${TRAVIS_BUILD_DIR}/mazda/m3-toolchain/arm-cortexa9_neon-linux-gnueabi/sysroot/usr/lib/pkgconfig:${TRAVIS_BUILD_DIR}/mazda/protobuf-2.6.1-arm/lib/pkgconfig
+      export PATH=${TRAVIS_BUILD_DIR}/mazda/m3-toolchain/bin:$PATH
+    - BUILD_TYPE=Release
+      CMAKE_ARGS="-DCMAKE_TOOLCHAIN_FILE=${TRAVIS_BUILD_DIR}/cmake/gcc-toolchain.cmake
+                  -DBUILD_MAZDA=ON -DCMAKE_STAGING_PREFIX=`pwd`/staging/usr/local
+                  -DOPENSSL_CRYPTO_LIBRARY=${TRAVIS_BUILD_DIR}/mazda/m3-toolchain/arm-cortexa9_neon-linux-gnueabi/sysroot/usr/lib/libcrypto.a
+                  -DOPENSSL_INCLUDE_DIR=${TRAVIS_BUILD_DIR}/mazda/m3-toolchain/arm-cortexa9_neon-linux-gnueabi/sysroot/usr/include
+                  -DProtobuf_LIBRARIES=${TRAVIS_BUILD_DIR}/mazda/protobuf-2.6.1-arm/lib/libprotobuf-lite.a
+                  -DProtobuf_INCLUDE_DIR=${TRAVIS_BUILD_DIR}/mazda/protobuf-2.6.1-arm/include"
+      export PKG_CONFIG_PATH=${TRAVIS_BUILD_DIR}/mazda/m3-toolchain/arm-cortexa9_neon-linux-gnueabi/sysroot/usr/lib/pkgconfig:${TRAVIS_BUILD_DIR}/mazda/protobuf-2.6.1-arm/lib/pkgconfig
+      export PATH=${TRAVIS_BUILD_DIR}/mazda/m3-toolchain/bin:$PATH
+    - BUILD_TYPE=MinSizeRel
+      CMAKE_ARGS="-DCMAKE_TOOLCHAIN_FILE=${TRAVIS_BUILD_DIR}/cmake/gcc-toolchain.cmake
+                  -DBUILD_MAZDA=ON -DCMAKE_STAGING_PREFIX=`pwd`/staging/usr/local
+                  -DOPENSSL_CRYPTO_LIBRARY=${TRAVIS_BUILD_DIR}/mazda/m3-toolchain/arm-cortexa9_neon-linux-gnueabi/sysroot/usr/lib/libcrypto.a
+                  -DOPENSSL_INCLUDE_DIR=${TRAVIS_BUILD_DIR}/mazda/m3-toolchain/arm-cortexa9_neon-linux-gnueabi/sysroot/usr/include
+                  -DProtobuf_LIBRARIES=${TRAVIS_BUILD_DIR}/mazda/protobuf-2.6.1-arm/lib/libprotobuf-lite.a
+                  -DProtobuf_INCLUDE_DIR=${TRAVIS_BUILD_DIR}/mazda/protobuf-2.6.1-arm/include"
+      export PKG_CONFIG_PATH=${TRAVIS_BUILD_DIR}/mazda/m3-toolchain/arm-cortexa9_neon-linux-gnueabi/sysroot/usr/lib/pkgconfig:${TRAVIS_BUILD_DIR}/mazda/protobuf-2.6.1-arm/lib/pkgconfig
+      export PATH=${TRAVIS_BUILD_DIR}/mazda/m3-toolchain/bin:$PATH
 
 script:
   - env
