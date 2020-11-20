@@ -17,7 +17,7 @@ class HUTransportStreamTCP : public HUTransportStream
     int itcp_init();
  public:
     ~HUTransportStreamTCP();
-    HUTransportStreamTCP(std::string& phoneIpAddress): phoneIpAddress(phoneIpAddress) {}
+    HUTransportStreamTCP(std::string& IpAddress);
     virtual int Start(bool waitForDevice) override;
     virtual int Stop() override;
     virtual int Write(const byte* buf, int len, int tmo) override;

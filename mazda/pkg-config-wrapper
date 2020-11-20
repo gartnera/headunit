@@ -1,7 +1,0 @@
-#!/bin/bash
-
-export PKG_CONFIG_DIR=
-export PKG_CONFIG_LIBDIR=$1/usr/lib/pkgconfig
-export PKG_CONFIG_SYSROOT_DIR=$1
-
-exec pkg-config ${@:2}

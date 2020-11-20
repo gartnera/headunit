@@ -7,6 +7,7 @@
 #include <condition_variable>
 #include <dbus/dbus.h>
 #include <dbus-c++/dbus.h>
+#include <atomic>
 
 #include "../dbus/generated_cmu.h"
 
@@ -58,7 +59,7 @@ enum NaviTurns: uint32_t {
 void hud_start();
 void hud_stop();
 bool hud_installed();
-void hud_thread_func(std::condition_variable& quitcv, std::mutex& quitmutex, std::mutex& hudmutex);
+void hud_thread_func(std::condition_variable& quitcv, std::mutex& quitmutex, std::mutex& hudmutex, std::atomic<bool> &exiting);
 
 class HUDSettingsClient : public com::jci::navi2IHU::HUDSettings_proxy,
                      public DBus::ObjectProxy

@@ -84,6 +84,7 @@ namespace WPP {
             void post(string, string);
             void all(string, string);
             bool start(int port = 80);
+            void stop();
 
             Server();
             ~Server();

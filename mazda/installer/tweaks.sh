@@ -149,6 +149,16 @@ modify_cmu_files()
             log_message "autostart entry added to /jci/scripts/stage_wifi.sh ... DONE\n"
         fi
     fi
+    log_message "Copying BdsConfiguration.xml"
+    if grep -Fq "AndroidAuto" /jci/bds/BdsConfiguration.xml; then
+      log_message "Android Auto entry already in BdsConfiguration.xml"
+    else
+      if cp -a /jci/bds/BdsConfiguration.xml /jci/bds/BdsConfiguration.xml.bak; then
+        cp "${MYDIR}/config/jci/bds/BdsConfiguration.xml" /jci/bds/BdsConfiguration.xml
+      else
+        log_message "Backing up BdsConfiguration.xml failed. No changes made"
+      fi
+    fi
 }
 
 revert_cmu_files()
@@ -207,6 +217,14 @@ revert_cmu_files()
                 log_message "FAILED\n"
             fi
         fi
+    fi
+    if grep -Fq "AndroidAuto" /jci/bds/BdsConfiguration.xml; then
+      log_message "Reverting BdsConfiguration.xml"
+      if cp -a /jci/bds/BdsConfiguration.xml.bak /jci/bds/BdsConfiguration.xml; then
+        log_message "BdsConfiguration.xml reverted"
+      else
+        log_message "Failed to revert BdsConfiguration.xml"
+      fi
     fi
 }
 
@@ -308,8 +326,7 @@ else
     log_message "Installing Android Auto.\n"
 fi
 
-if [ ${installed} -eq 0 ]; then
-    # this is an installation path - installed=false
+if [ ${installed} -eq 0 ]; then    # this is an installation path - installed=false
     show_message "INSTALLING" "Android Auto is installing ..."
 
     modify_cmu_files

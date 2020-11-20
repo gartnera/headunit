@@ -1,6 +1,8 @@
 syntax = "proto2";
 option cc_generic_services = false;
 
+option optimize_for = LITE_RUNTIME;
+
 package HU;
 
 enum STATUS
@@ -762,4 +764,62 @@ message NAVDistanceMessage
         FEET = 6;         // feet * 1000
     }
     optional DISPLAY_DISTANCE_UNIT display_distance_unit = 4;
+}
+
+message WifiChannel
+{
+    required string ssid = 1;
+}
+
+message WifiInfoRequest
+{
+    required string ip_address = 1;
+    optional uint32 port = 2;
+}
+
+message WifiInfoResponse {
+    optional string ip_address = 1;
+    optional uint32 port = 2;
+    required Status status = 3;
+
+    enum Status {
+        STATUS_UNSOLICITED_MESSAGE = 1;
+        STATUS_SUCCESS = 0;
+        STATUS_NO_COMPATIBLE_VERSION = -1;
+        STATUS_WIFI_INACCESSIBLE_CHANNEL = -2;
+        STATUS_WIFI_INCORRECT_CREDENTIALS = -3;
+        STATUS_PROJECTION_ALREADY_STARTED = -4;
+        STATUS_WIFI_DISABLED = -5;
+        STATUS_WIFI_NOT_YET_STARTED = -6;
+        STATUS_INVALID_HOST = -7;
+        STATUS_NO_SUPPORTED_WIFI_CHANNELS = -8;
+        STATUS_INSTRUCT_USER_TO_CHECK_THE_PHONE = -9;
+        STATUS_PHONE_WIFI_DISABLED = -10;
+    }
+}
+
+message WifiSecurityReponse {
+    required string ssid = 1; //mo15384a
+    required string key = 2; //mo15385b
+    required string bssid = 3; //mo15386c
+    required SecurityMode security_mode = 4;
+    required AccessPointType access_point_type = 5;
+
+    enum SecurityMode {
+        UNKNOWN_SECURITY_MODE = 0;
+        OPEN = 1;
+        WEP_64 = 2;
+        WEP_128 = 3;
+        WPA_PERSONAL = 4;
+        WPA2_PERSONAL = 8;
+        WPA_WPA2_PERSONAL = 12;
+        WPA_ENTERPRISE = 20;
+        WPA2_ENTERPRISE = 24;
+        WPA_WPA2_ENTERPRISE = 28;
+    }
+
+    enum AccessPointType {
+        STATIC = 0;
+        DYNAMIC = 1;
+    }
 }

@@ -1,0 +1,47 @@
+<bdsConfig logLevel="info">
+   <transport transportType="UART" initialBaudRate="115200" finalBaudRate="3000000" uartClock="32000000" serPort="/dev/ttymxc3" tistsupport="false" phyport="/dev/ttymxc3" uartsnifferenable="false" uartsnifferfilepath="/tmp/hci_btsnoop.log"/>
+   <btRadio radioType="TI1283" radioClock="26000" scoTransport="SCO_PCM" scoSize="32" patchFile="/jci/bds/TI128x_INIT.bts" wbsPatchFile="/jci/bds/TI128x_AVPR.bts" ioCap="DISPLAY_YES_NO" enableSsp="True"
+       LstTimeout="5000" SniffEnable="true" AutoPairHftName="Smart Pair" enableSspDebug="false" wbsSupport="false" enableRoleSwitch="false" MasterRole="false"/>
+       <!-- "enableRoleSwitch" and "MasterRole" has been added to configuration. But "MasterRole" should be always "false" as it is a experimental feature in Bluego-->
+	   <!-- For wide band speech set  wbsSupport="true"  to disable set wbsSupport="false"-->    
+
+	<!-- enableDid:  to enable/disable the didinformation of hft
+		  productId: 	when enableDid="true", this value could  be exmple 0x1231 .
+		  version:		when enableDid="true", this value could  be exmple 0x1231 .
+	-->
+   <didInfo enableDid="false" productId="0xffff" version="0xffff" />
+
+    <!-- Multiple instances of a service can be enabled using noOfInstances attribute. For e.g. setting noOfInstances of a serialPort service to 2 will create two instances of serialPort in BDS
+         meaning two devices can be connected with the serialPort service independent of each other in every regard of that service including but not limited to a pty and its thread etc.
+         At this time of writing, ONLY serialPort has support for multiple instances in lower layers. ALL OTHER SERVICES noOfInstances SHOULD BE 1.
+         
+         For serialPort: BE CAREFUL while choosing the noOfInstances because that would affect other services which require a rfcomm port. An ideal situation for each of these services would
+         be to choose a minimum of 1 to a maximum of 3 instances. If you need to use more than 3 instances? - talk to BDS team for feasibility in the software.
+    -->
+   <serviceConfiguration>
+       <callClient id="1" name="Handsfree" noOfInstances="1" critical="true" enabled="true" autoTransferEnabled="true" disableNrec="true" securityLevel="LEVEL2"/>
+       <audioSink id="2" name="Audio Sink" noOfInstances="1" critical="true" enabled="true" securityLevel="LEVEL1"/>
+       <networkClient id="3" name="Network Client" noOfInstances="1" critical="false" enabled="false" panDisable ="true" securityLevel="LEVEL2"/>
+       <pimClient id="4" name="PIM Client" noOfInstances="1" critical="true" enabled="true" securityLevel="LEVEL2" vCardFileSize="8192000"/>
+       <serialPort id="5" name="Phone Gateway" noOfInstances="1" critical="false" enabled="true" uuidServer="4A43492050686F6E6547617465776179" uuidClient="4A43492050686F6E6547617465776179" writeDelay="3"/>
+       <messageClient id="6" name="Message Client" noOfInstances="1" critical="false" enabled="true" securityLevel="LEVEL3"/>
+       <fileServer id="7" name="File Server" noOfInstances="1" critical="false" enabled="true" inbox="/tmp/inbox/telecom" securityLevel="LEVEL3"/>
+       <serialPort id="8" name="Wireless iAP" noOfInstances="3" critical="false" enabled="true" uuidServer="00000000decafadedecadeafdecacaff" uuidClient="00000000decafadedecadeafdecacafe" writeDelay="3"/>
+       <serialPort id="9" name="JCI Reflash Server" noOfInstances="1" critical="false" enabled="true" uuidServer="4A4349204254205265666C6173682053" uuidClient="4A4349204254205265666C6173682043" writeDelay="3"/>
+       <serialPort id="10" name="UUID Pandora for Android and BlackBerry" noOfInstances="1" critical="false" enabled="true" uuidServer="453994D5D58B96F96616B37F586BA2EC" uuidClient="453994D5D58B96F96616B37F586BA2EC" writeDelay="3"/>
+       <serialPort id="11" name="Stitcher" noOfInstances="1" critical="false" enabled="true" uuidServer="B3093027F77A4C37860A6502360DDA76" uuidClient="B3093027F77A4C37860A6502360DDA76" writeDelay="3"/>
+       <serialPort id="12" name="AHA Radio" noOfInstances="1" critical="false" enabled="true" uuidServer="143DD5D09C4811E090579CDF03414841" uuidClient="143DD5D09C4811E090579CDF03414841" writeDelay="3"/>
+       <serialPort id="14" name="Android VDT" noOfInstances="1" critical="false" enabled="true" uuidServer="DC022184EA4D4fc38CC62F41C506D3BF" uuidClient="DC022184EA4D4fc38CC62F41C506D3BF" writeDelay="3"/>
+       <serialPort id="15" name="AndroidAuto" noOfInstances="1" critical="false" enabled="true" uuidServer="4DE17A0052CB11E6BDF40800200C9A66" uuidClient="4DE17A0052CB11E6BDF40800200C9A66" writeDelay="3"/>
+  </serviceConfiguration>
+   <!-- For wide band speech hfpsupportedFeatures = "0x000000FF"  For Narrow band  hfpsupportedFeatures = "0x0000006F"-->    
+   <hfpConfiguration hfpSupportedFeatures="0x0000006F" hfpInformationToSiri="JCI-IHU-0001,14"/>
+   <!-- musicThreadSchedPolicy options available are:      "FIFO" "RR" " "OTHER" "SPORADIC"
+		if RR: musicThreadPriority values will be set as priority.
+		if OTHER: musicThreadPriority  values will be set as nice value for the thread  the value must be between -20 to 20	
+   	-->      
+   <musicThreadSetting enableThreadSetting="True" musicThreadPriority="16" musicThreadSchedPolicy="RR"/>
+   
+   <interface name="dbus"/>
+   <xlator name="bluego" logLevel="verbose"/>
+</bdsConfig>

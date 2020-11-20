@@ -67,3 +67,7 @@ bool CommandServer::Start()
 {
     return server.start(9999);
 }
+
+void CommandServer::Stop(){
+    server.stop();
+}

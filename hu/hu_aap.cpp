@@ -618,7 +618,7 @@
   }
 
   int HUServer::hu_handle_ShutdownRequest (int chan, byte * buf, int len) {                  // Byebye Request
-
+    logd("Shutdown Request");
     HU::ShutdownRequest request;
     if (!request.ParseFromArray(buf, len))
       loge ("Byebye Request");
@@ -635,6 +635,13 @@
     hu_aap_stop ();
 
     return (-1);
+  }
+
+  int HUServer::hu_handle_ShutdownResponse (int chan, byte * buf, int len) {                  // Byebye Request
+      logd("Shutdown Response");
+      hu_aap_stop ();
+
+      return (-1);
   }
 
   int HUServer::hu_handle_VoiceSessionRequest (int chan, byte * buf, int len) {                  // sr:  00000000 00 11 08 01      Microphone voice search usage     sr:  00000000 00 11 08 02
@@ -1036,6 +1043,8 @@
             return hu_handle_NavigationFocusRequest(chan, buf, len);
           case HU_PROTOCOL_MESSAGE::ShutdownRequest:
             return hu_handle_ShutdownRequest(chan, buf, len);
+          case HU_PROTOCOL_MESSAGE::ShutdownResponse:
+            return hu_handle_ShutdownResponse(chan, buf, len);
           case HU_PROTOCOL_MESSAGE::VoiceSessionRequest:
             return hu_handle_VoiceSessionRequest(chan, buf, len);
           case HU_PROTOCOL_MESSAGE::AudioFocusRequest:
@@ -1168,48 +1177,44 @@
     }
   }
 
-  int HUServer::hu_aap_shutdown()
-  {
-
-    if (hu_thread.joinable())
-    {
-      int ret = hu_queue_command([this](IHUConnectionThreadInterface& s)
-      {
-        if (iaap_state == hu_STATE_STARTED)
-        {
-          logw("Sending ShutdownRequest");
-          HU::ShutdownRequest byebye;
-          byebye.set_reason(HU::ShutdownRequest::REASON_QUIT);
-          s.hu_aap_enc_send_message(0, AA_CH_CTR, HU_PROTOCOL_MESSAGE::ShutdownRequest, byebye);
-          ms_sleep(500);
-        }
-        s.hu_aap_stop();
+  int HUServer::hu_aap_shutdown() {
+      int ret = hu_queue_command([this](IHUConnectionThreadInterface &s) {
+          if (iaap_state == hu_STATE_STARTED) {
+              logw("Sending ShutdownRequest");
+              HU::ShutdownRequest byebye;
+              byebye.set_reason(HU::ShutdownRequest::REASON_QUIT);
+              s.hu_aap_enc_send_message(0, AA_CH_CTR, HU_PROTOCOL_MESSAGE::ShutdownRequest, byebye);
+          }
       });
-
-      if (ret < 0)
-      {
-        loge("write end command error %d", ret);
+      ms_sleep(500);
+      if (ret < 0) {
+          loge("write end command error %d", ret);
       }
-      hu_thread.join();
-    }
 
-    if (command_write_fd >= 0)
-      close(command_write_fd);
-    command_write_fd = -1;
 
-    if (command_read_fd >= 0)
-      close(command_read_fd);
-    command_read_fd = -1;
+  }
 
-    // Send Byebye
-    iaap_state = hu_STATE_STOPPIN;
-    logd ("  SET: iaap_state: %d (%s)", iaap_state, state_get (iaap_state));
+  void HUServer::join(){
+      if (hu_thread.joinable()) {
+          hu_thread.join();
+      }
 
-    int ret = ihu_tra_stop ();                                           // Stop Transport/USBACC/OAP
-    iaap_state = hu_STATE_STOPPED;
-    logd ("  SET: iaap_state: %d (%s)", iaap_state, state_get (iaap_state));
+      if (command_write_fd >= 0)
+          close(command_write_fd);
+      command_write_fd = -1;
 
-    return (ret);
+      if (command_read_fd >= 0)
+          close(command_read_fd);
+      command_read_fd = -1;
+
+      // Send Byebye
+      iaap_state = hu_STATE_STOPPIN;
+      logd ("  SET: iaap_state: %d (%s)", iaap_state, state_get(iaap_state));
+
+      ihu_tra_stop();                                           // Stop Transport/USBACC/OAP
+      iaap_state = hu_STATE_STOPPED;
+      logd ("  SET: iaap_state: %d (%s)", iaap_state, state_get(iaap_state));
+
   }
 
   int HUServer::hu_aap_stop () {                                                  // Sends Byebye, then stops Transport/USBACC/OAP
@@ -1223,14 +1228,19 @@
     if (iaap_state != hu_STATE_STARTED)
       return (0);
 
-    HU::ShutdownRequest shutdownReq;
-    shutdownReq.set_reason(HU::ShutdownRequest::REASON_QUIT);
-    hu_aap_enc_send_message(0, AA_CH_CTR, HU_PROTOCOL_MESSAGE::ShutdownRequest, shutdownReq);
-
     hu_thread_quit_flag = true;
     callbacks.DisconnectionOrError();
 
     return (0);
+  }
+
+  bool HUServer::running(){
+      if(iaap_state == hu_STATE_STOPPED){
+          return true;
+      }
+      else{
+          return false;
+      }
   }
 
   IHUAnyThreadInterface::HUThreadCommand* HUServer::hu_pop_command()
@@ -1300,7 +1310,7 @@
           if (ret < 0)
           {
             loge("hu_aap_recv_process failed %d", ret);
-            hu_aap_stop();
+            hu_aap_shutdown();
           }
         }
       }

@@ -2,7 +2,7 @@
 
 #include <glib.h>
 #include <stdio.h>
-#include <asoundlib.h>
+#include <alsa/asoundlib.h>
 #include <thread>
 
 #include "hu_uti.h"

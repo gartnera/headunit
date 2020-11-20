@@ -5,6 +5,8 @@
   int itcp_state = 0; // 0: Initial    1: Startin    2: Started    3: Stoppin    4: Stopped
   int last_errno = 0; //store last error printed
 
+  int wifi_direct = 0;
+
   #include <sys/types.h>
   #include <sys/time.h>
   #include <unistd.h>
@@ -24,6 +26,12 @@
     {
       Stop();
     }
+  }
+
+  HUTransportStreamTCP::HUTransportStreamTCP(std::string& IpAddress): phoneIpAddress(IpAddress){
+      if(strcmp(IpAddress.c_str(), "0.0.0.0") == 0){
+          wifi_direct = 1;
+      }
   }
 
   int HUTransportStreamTCP::Write (const byte * buf, int len, int tmo) {

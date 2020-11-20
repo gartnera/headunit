@@ -69,7 +69,9 @@ void MazdaEventCallbacks::MediaSetupComplete(int chan) {
 
 void MazdaEventCallbacks::DisconnectionOrError() {
     printf("DisconnectionOrError\n");
-    g_main_loop_quit(gst_app.loop);
+    if(g_main_loop_is_running(gst_app.loop)){
+        g_main_loop_quit(gst_app.loop);
+    }
 }
 
 void MazdaEventCallbacks::CustomizeOutputChannel(int chan, HU::ChannelDescriptor::OutputStreamChannel &streamChannel) {
@@ -191,7 +193,7 @@ VideoManagerClient::~VideoManagerClient() {
     //We can't call release video focus since the callbacks object is being destroyed, but make sure we got to opera if no in backup cam
     if (allowedToGetFocus) {
         logd("Requesting video surface: JCI_OPERA_PRIMARY");
-        guiClient.SetRequiredSurfacesByEnum({NativeGUICtrlClient::JCI_OPERA_PRIMARY}, true);
+        guiClient.SetRequiredSurfacesByEnum(NativeGUICtrlClient::JCI_OPERA_PRIMARY, true);
     }
 }
 
@@ -209,7 +211,7 @@ void VideoManagerClient::requestVideoFocus(VIDEO_FOCUS_REQUESTOR requestor)
     auto handleRequest = [this, unrequested](){
         callbacks.VideoFocusHappened(true, unrequested);
         logd("Requesting video surface: TV_TOUCH_SURFACE");
-        guiClient.SetRequiredSurfacesByEnum({NativeGUICtrlClient::TV_TOUCH_SURFACE}, true);
+        guiClient.SetRequiredSurfacesByEnum(NativeGUICtrlClient::TV_TOUCH_SURFACE, true);
         return false;
     };
     if (requestor == VIDEO_FOCUS_REQUESTOR::BACKUP_CAMERA)
@@ -235,7 +237,7 @@ void VideoManagerClient::releaseVideoFocus(VIDEO_FOCUS_REQUESTOR requestor)
     callbacks.VideoFocusHappened(false, unrequested);
     if (requestor != VIDEO_FOCUS_REQUESTOR::BACKUP_CAMERA) {
         logd("Requesting video surface: JCI_OPERA_PRIMARY");
-        guiClient.SetRequiredSurfacesByEnum({NativeGUICtrlClient::JCI_OPERA_PRIMARY}, true);
+        guiClient.SetRequiredSurfacesByEnum(NativeGUICtrlClient::JCI_OPERA_PRIMARY, true);
     }
 }
 
@@ -653,6 +655,9 @@ extern NaviData *navi_data;
 extern std::mutex hudmutex;
 
 void MazdaEventCallbacks::HandleNaviStatus(IHUConnectionThreadInterface& stream, const HU::NAVMessagesStatus &request){
+    if (navi_data == nullptr){
+        return;
+    }
   if (request.status() == HU::NAVMessagesStatus_STATUS_STOP) {
     hudmutex.lock();
     navi_data->event_name = "";
@@ -669,9 +674,11 @@ void MazdaEventCallbacks::HandleNaviStatus(IHUConnectionThreadInterface& stream,
   }
 }
 
-void logUnknownFields(const ::google::protobuf::UnknownFieldSet& fields);
 
 void MazdaEventCallbacks::HandleNaviTurn(IHUConnectionThreadInterface& stream, const HU::NAVTurnMessage &request){
+    if (navi_data == nullptr){
+        return;
+    }
   logw("NAVTurnMessage: turn_side: %d, turn_event: %d, turn_number: %d, turn_angle: %d, event_name: %s", 
       request.turn_side(),
       request.turn_event(),
@@ -679,7 +686,6 @@ void MazdaEventCallbacks::HandleNaviTurn(IHUConnectionThreadInterface& stream, c
       request.turn_angle(),
       request.event_name().c_str()
   );
-  logUnknownFields(request.unknown_fields());
 
   hudmutex.lock();
   int changed = 0;
@@ -714,6 +720,9 @@ void MazdaEventCallbacks::HandleNaviTurn(IHUConnectionThreadInterface& stream, c
 }
 
 void MazdaEventCallbacks::HandleNaviTurnDistance(IHUConnectionThreadInterface& stream, const HU::NAVDistanceMessage &request) {
+    if (navi_data == nullptr){
+        return;
+    }
   hudmutex.lock();
   int now_distance;
   HudDistanceUnit now_unit;
@@ -743,7 +752,6 @@ void MazdaEventCallbacks::HandleNaviTurnDistance(IHUConnectionThreadInterface& s
             request.display_distance(),
             request.display_distance_unit()
         );
-        logUnknownFields(request.unknown_fields());
 
         if (request.distance() > 1000) {
             now_distance = request.distance() / 100;
@@ -774,51 +782,4 @@ void MazdaEventCallbacks::HandleNaviTurnDistance(IHUConnectionThreadInterface& s
   }
 
   hudmutex.unlock();
-}
-
-void logUnknownFields(const ::google::protobuf::UnknownFieldSet& fields) {
-  for (int i = 0; i < fields.field_count(); i++) {
-    switch (fields.field(i).type()) {
-        case 0: // TYPE_VARINT
-            logw("ExtraField: number: %d, type: %d, value: %d", 
-                fields.field(i).number(),
-                0,
-                fields.field(i).varint()
-            );
-            break;
-        case 1: // TYPE_FIXED32
-            logw("ExtraField: number: %d, type: %d, value: %d", 
-                fields.field(i).number(),
-                1,
-                fields.field(i).fixed32()
-            );
-            break;
-        case 2: // TYPE_FIXED64
-            logw("ExtraField: number: %d, type: %d, value: %d", 
-                fields.field(i).number(),
-                2,
-                fields.field(i).fixed64()
-            );
-            break;
-        case 3: // TYPE_LENGTH_DELIMITED
-            logw("ExtraField: number: %d, type: %d, value: %s", 
-                fields.field(i).number(),
-                3,
-                &(fields.field(i).length_delimited())
-            );
-            break;
-        case 4: // TYPE_GROUP
-            logw("ExtraField: number: %d, type: %d", 
-                fields.field(i).number(),
-                4
-            );
-            break;
-        default:
-            logw("ExtraField: number: %d, type: %d", 
-                fields.field(i).number(),
-                fields.field(i).type()
-            );
-            break;
-    }
-  }
 }

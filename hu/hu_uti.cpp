@@ -46,7 +46,7 @@ int gen_server_poll_func (int poll_ms);
 
 int ena_log_extra   = 0;
 int ena_log_verbo   = 0;
-int ena_log_debug   = 0;
+int ena_log_debug   = 1;
 int ena_log_warni   = 1;
 int ena_log_error   = 1;
 

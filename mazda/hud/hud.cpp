@@ -8,6 +8,7 @@
 #include <condition_variable>
 #include <signal.h>
 #include <thread>
+#include <atomic>
 
 #include "../dbus/generated_cmu.h"
 
@@ -55,10 +56,10 @@ uint8_t roundabout(int32_t degrees, int32_t side){
   return(nearest + offset);
 }
 
-void hud_thread_func(std::condition_variable& quitcv, std::mutex& quitmutex, std::mutex& hudmutex){
-  std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+void hud_thread_func(std::condition_variable& quitcv, std::mutex& quitmutex, std::mutex& hudmutex, std::atomic<bool> &exiting){
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
   //Don't bother with the HUD if we aren't connected via dbus
-  while (hud_installed())
+  while (!exiting)
   {
     // if (hud_client == NULL) {
     //   return;

@@ -1,4 +1,10 @@
-#include <stdint.h>
+#pragma once
+
+#include <cstdint>
+#include <functional>
+#include <condition_variable>
+#include <dbus-c++/dbus.h>
+#include <glib.h>
 
 struct GPSData
 {
@@ -15,10 +21,12 @@ struct GPSData
     bool IsSame(const GPSData& other) const;
 };
 
-void mzd_gps2_start();
+void mzd_gps2_start(DBus::Connection& serviceBus);
 
 bool mzd_gps2_get(GPSData& data);
 void mzd_gps2_set_enabled(bool bEnabled);
 
 void mzd_gps2_stop();
+
+gboolean gps_func(gpointer user_data);
 

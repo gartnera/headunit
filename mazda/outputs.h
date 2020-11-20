@@ -6,7 +6,6 @@
 #include <gst/app/gstappsrc.h>
 #include <dbus-c++/dbus.h>
 #include <time.h>
-#include <glib-unix.h>
 
 #include "dbus/generated_cmu.h"
 

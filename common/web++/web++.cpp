@@ -1,4 +1,8 @@
 #include "web++.hpp"
+#include <condition_variable>
+#include <mutex>
+#include <chrono>
+
 
 namespace  {
 using namespace std;
@@ -391,6 +395,9 @@ bool Server::match_route(Request* req, Response* res) {
     return false;
 }
 
+std::condition_variable quitcv;
+std::mutex quitmutex;
+
 void Server::main_loop() {
 
     struct sockaddr_in cli_addr;
@@ -467,6 +474,11 @@ void Server::main_loop() {
         t = write(newsc, body_string.c_str(), body_string.size());
 
         close(newsc);
+
+        std::unique_lock <std::mutex> lk(quitmutex);
+        if (quitcv.wait_for(lk, std::chrono::milliseconds{0}) == std::cv_status::no_timeout) {
+            break;
+        }
     }
 }
 
@@ -502,6 +514,10 @@ bool Server::start(int port) {
     }
 
     return true;
+}
+
+void Server::stop(){
+    quitcv.notify_all();
 }
 
 Server::Server() {

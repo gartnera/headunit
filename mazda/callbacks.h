@@ -7,7 +7,7 @@
 #include "command_server.h"
 #include "audio.h"
 #include <dbus-c++/dbus.h>
-#include <asoundlib.h>
+#include <alsa/asoundlib.h>
 
 #include "dbus/generated_cmu.h"
 #include "version.h"
@@ -29,33 +29,26 @@ public:
     enum SURFACES
     {
         NNG_NAVI_ID = 0,
-        TV_TOUCH_SURFACE,
-        NATGUI_SURFACE,
-        LOOPLOGO_SURFACE,
-        TRANLOGOEND_SURFACE,
-        TRANLOGO_SURFACE,
-        QUICKTRANLOGO_SURFACE,
-        EXITLOGO_SURFACE,
-        JCI_OPERA_PRIMARY,
-        JCI_OPERA_SECONDARY,
-        lvdsSurface,
-        SCREENREP_IVI_NAME,
-        NNG_NAVI_MAP1,
-        NNG_NAVI_MAP2,
-        NNG_NAVI_HMI,
-        NNG_NAVI_TWN,
+        TV_TOUCH_SURFACE = 1,
+        NATGUI_SURFACE = 2,
+        LOOPLOGO_SURFACE = 3,
+        TRANLOGOEND_SURFACE = 4,
+        TRANLOGO_SURFACE = 5,
+        QUICKTRANLOGO_SURFACE = 6,
+        EXITLOGO_SURFACE = 8,
+        JCI_OPERA_PRIMARY = 9,
+        JCI_OPERA_SECONDARY = 10,
+        lvdsSurface = 11,
+        SCREENREP_IVI_NAME = 12,
+        NNG_NAVI_MAP1 = 13,
+        NNG_NAVI_MAP2 = 14,
+        NNG_NAVI_HMI = 15,
+        NNG_NAVI_TWN = 16,
     };
 
-    void SetRequiredSurfacesByEnum(const std::vector<SURFACES>& surfaces, bool fadeOpera)
+    void SetRequiredSurfacesByEnum(const int surface, bool fadeOpera)
     {
-        std::ostringstream idString;
-        for (size_t i = 0; i < surfaces.size(); i++)
-        {
-            if (i > 0)
-                idString << ",";
-            idString << surfaces[i];
-        }
-        SetRequiredSurfaces(idString.str(), fadeOpera ? 1 : 0);
+        SetRequiredSurfaces(std::to_string(surface), fadeOpera ? 1 : 0);
     }
 };
 

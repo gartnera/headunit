@@ -24,4 +24,5 @@ public:
     CommandServer(ICommandServerCallbacks& callbacks);
 
     bool Start();
+    void Stop();
 };
