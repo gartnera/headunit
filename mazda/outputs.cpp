@@ -1,6 +1,7 @@
 #include "outputs.h"
 #include "main.h"
 #include "callbacks.h"
+#include "config.h"
 
 #include "json/json.hpp"
 using json = nlohmann::json;
@@ -72,8 +73,15 @@ struct TouchScreenState {
 
 static void aa_touch_event(HU::TouchInfo::TOUCH_ACTION action, unsigned int x, unsigned int y, uint64_t ts) {
 
+    if (config::disableTouchscreen)
+        return;
+
     g_hu->hu_queue_command([action, x, y, ts](IHUConnectionThreadInterface& s)
     {
+        // The setting may have changed while this event was queued.
+        if (config::disableTouchscreen)
+            return;
+
         HU::InputEvent inputEvent;
         inputEvent.set_timestamp(ts);
         HU::TouchInfo* touchEvent = inputEvent.mutable_touch();

@@ -142,6 +142,7 @@ public:
     virtual int MediaStop(int chan) override;
     virtual void MediaSetupComplete(int chan) override;
     virtual void DisconnectionOrError() override;
+    virtual void CustomizeInputConfig(HU::ChannelDescriptor::InputEventChannel& inputChannel) override;
     virtual void CustomizeOutputChannel(int chan, HU::ChannelDescriptor::OutputStreamChannel& streamChannel) override;
     virtual void AudioFocusRequest(int chan, const HU::AudioFocusRequest& request) override;
     virtual void VideoFocusRequest(int chan, const HU::VideoFocusRequest& request) override;

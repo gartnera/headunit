@@ -1,5 +1,6 @@
 #pragma once
 
+#include <atomic>
 #include "json/json.hpp"
 using json = nlohmann::json;
 
@@ -16,10 +17,10 @@ public:
     static HU_TRANSPORT_TYPE transport_type;
     static std::string phoneIpAddress;
     static bool reverseGPS;
+    static std::atomic<bool> disableTouchscreen;
 
 private:
     static json readConfigFile();
     static void writeConfigFile(json config_json);
     static void parseJson(json config_json);
 };
-

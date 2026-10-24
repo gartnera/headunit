@@ -72,6 +72,13 @@ void MazdaEventCallbacks::DisconnectionOrError() {
     g_main_loop_quit(gst_app.loop);
 }
 
+void MazdaEventCallbacks::CustomizeInputConfig(HU::ChannelDescriptor::InputEventChannel& inputChannel) {
+    if (config::disableTouchscreen)
+    {
+        inputChannel.clear_touch_screen_config();
+    }
+}
+
 void MazdaEventCallbacks::CustomizeOutputChannel(int chan, HU::ChannelDescriptor::OutputStreamChannel &streamChannel) {
 #if ASPECT_RATIO_FIX
     if (chan == AA_CH_VID) {

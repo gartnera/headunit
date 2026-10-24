@@ -3,5 +3,6 @@
     "carGPS": true,
     "wifiTransport": false,
     "phoneIpAddress": "192.168.43.1",
-    "reverseGPS": false
+    "reverseGPS": false,
+    "disableTouchscreen": false
 }
